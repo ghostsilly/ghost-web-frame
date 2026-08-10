@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ghost.frame.modules.mapper.UserMapper">
+
+    <resultMap id="BaseResultMap" type="com.ghost.frame.modules.entity.User">
+            <id property="id" column="id" />
+            <result property="nickname" column="nickname" />
+            <result property="username" column="username" />
+            <result property="password" column="password" />
+            <result property="role" column="role" />
+            <result property="status" column="status" />
+            <result property="deleted" column="deleted" />
+            <result property="createdDate" column="created_date" />
+            <result property="createdBy" column="created_by" />
+            <result property="updatedDate" column="updated_date" />
+            <result property="updatedBy" column="updated_by" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,nickname,username,password,role,status,
+        deleted,created_date,created_by,updated_date,updated_by
+    </sql>
+</mapper>

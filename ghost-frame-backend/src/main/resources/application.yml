@@ -1,16 +1,24 @@
 # 服务端口
 server:
   port: 8080
-
+# 服务名称
 spring:
   application:
     name: ghost-frame-backend
+  # 配置文件
+  profiles:
+    active: local
+  # 数据源配置
   datasource:
     url: jdbc:mysql://localhost:3306/silly_ghost_frame
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: ${mysql.username}
     password: ${mysql.password}
+  autoconfigure:
+    exclude: org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration
 
+
+# MyBatis-Plus 配置
 mybatis-plus:
   configuration:
     map-underscore-to-camel-case: true
@@ -18,3 +26,8 @@ mybatis-plus:
     db-config:
       id-type: auto
   type-aliases-package: com.ghost.frame.modules
+
+# JWT 配置
+jwt:
+  secret: ${jwt.jwt-secret}
+  expiration-ms: 43200000   #  半天

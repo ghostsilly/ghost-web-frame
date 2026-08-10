@@ -1,6 +1,7 @@
 
 package com.ghost.frame.modules.controller;
 
+import com.ghost.frame.common.Response;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -9,8 +10,8 @@ import org.springframework.web.bind.annotation.RestController;
 public class HealthController {
 
   @RequestMapping("/health")
-  public String health() {
-    return "ok";
+  public Response<String> health() {
+    return Response.success("ok");
   }
 
 }

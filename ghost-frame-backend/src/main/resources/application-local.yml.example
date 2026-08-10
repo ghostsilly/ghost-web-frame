@@ -1,3 +1,6 @@
 mysql:
   username: your_username
   password: your_password
+
+jwt:
+  jwt-secret: your_jwt_secret
