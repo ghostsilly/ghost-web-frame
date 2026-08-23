@@ -1,0 +1,17 @@
+#knife4j 核心配置
+knife4j:
+  enable: true        #开启增强功能（默认 false）
+  setting:
+    language: zh_cn                 #中文界面
+    enable-swagger-models: true     #启用实体类模型展示
+    enable-document-manage: true    #启用文档管理
+    swagger-model-name: 实体类列表
+springdoc:
+  api-docs:
+    enabled: true
+  group-configs:
+    - group: "用户模块"
+      paths-to-match: '${api}/auth/**'
+      packages-to-scan:
+        - com.ghost.frame.modules.entity.User
+

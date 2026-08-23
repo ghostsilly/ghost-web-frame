@@ -52,7 +52,14 @@ public class SecurityConfig {
                 sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
                 // 允许所有用户访问注册和登录接口
-                .requestMatchers("/api/auth/register", "/api/auth/login")
+                .requestMatchers(
+                    "/*/auth/register",
+                    "/*/auth/login",
+                    "/doc.html",
+                    "/v3/api-docs/**",
+                    "/swagger-resources/**",
+                    "/webjars/**"
+                )
                 .permitAll()
                 .anyRequest().authenticated()
             )
