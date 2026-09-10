@@ -17,10 +17,10 @@ public class OpenApiConfig {
   public OpenAPI customOpenAPI() {
     return new OpenAPI()
         .info(new Info()
-            .title("XX系统 API 文档")
+            .title("幽灵系统 API 文档")
             .version("1.0.0")
             .description("系统接口文档，支持在线调试")
-            .contact(new Contact().name("张三").email("zhangsan@example.com"))
+            .contact(new Contact().name("ghost").email("ghost@example.com"))
             .license(new License().name("MIT")))
         // 全局安全认证（JWT 示例）
         .addSecurityItem(new SecurityRequirement().addList("Bearer Token"))

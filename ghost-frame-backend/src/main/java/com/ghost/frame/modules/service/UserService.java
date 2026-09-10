@@ -1,7 +1,10 @@
 package com.ghost.frame.modules.service;
 
+import com.ghost.frame.modules.dto.LoginRequestDTO;
+import com.ghost.frame.modules.dto.RegisterRequestDTO;
 import com.ghost.frame.modules.entity.User;
 import com.baomidou.mybatisplus.extension.service.IService;
+import jakarta.validation.Valid;
 
 /**
 * @author 34592
@@ -10,4 +13,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 */
 public interface UserService extends IService<User> {
 
+  String login(@Valid LoginRequestDTO loginRequestDTO);
+
+  String register(@Valid RegisterRequestDTO registerRequestDTO);
 }

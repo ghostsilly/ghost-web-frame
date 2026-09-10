@@ -1,5 +1,7 @@
 package com.ghost.frame.modules.enums;
 
+import com.baomidou.mybatisplus.annotation.EnumValue;
+
 import java.util.Arrays;
 
 public enum UserRole {
@@ -10,12 +12,13 @@ public enum UserRole {
     /**
      * 枚举值
      */
-    private String code;
+    @EnumValue
+    private final String code;
 
     /**
      * 枚举描述
      */
-    private String desc;
+    private final String desc;
 
     /**
      * 构造函数

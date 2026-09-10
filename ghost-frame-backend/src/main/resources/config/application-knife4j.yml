@@ -4,7 +4,7 @@ knife4j:
   setting:
     language: zh_cn                 #中文界面
     enable-swagger-models: true     #启用实体类模型展示
-    enable-document-manage: true    #启用文档管理
+    enable-document-manage: false    #启用文档管理
     swagger-model-name: 实体类列表
 springdoc:
   api-docs:

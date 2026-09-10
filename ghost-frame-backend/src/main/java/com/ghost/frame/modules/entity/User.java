@@ -2,18 +2,19 @@ package com.ghost.frame.modules.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
 
-import java.time.LocalDateTime;
-import java.util.Date;
-
 import com.ghost.frame.modules.enums.DeleteFlag;
 import com.ghost.frame.modules.enums.UserRole;
 import com.ghost.frame.modules.enums.UserStatus;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
 /**
  * @TableName user
  */
+@AllArgsConstructor
+@NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 @TableName(value ="user")
 @Data

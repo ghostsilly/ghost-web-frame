@@ -22,6 +22,7 @@
         <jjwt-jackson.version>0.12.6</jjwt-jackson.version>
         <knife4j.version>4.5.0</knife4j.version>
         <springdoc-openapi.version>2.7.0</springdoc-openapi.version>
+        <hutool-all.version>5.8.47</hutool-all.version>
     </properties>
     <dependencies>
         <dependency>
@@ -101,6 +102,13 @@
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-common</artifactId>
             <version>${springdoc-openapi.version}</version>
+        </dependency>
+
+        <!-- hutool 糊涂工具包-->
+        <dependency>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-all</artifactId>
+            <version>${hutool-all.version}</version>
         </dependency>
     </dependencies>
 

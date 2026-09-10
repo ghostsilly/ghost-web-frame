@@ -5,7 +5,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-@MapperScan("com.ghost.frame.modules")
+@MapperScan("com.ghost.frame.modules.mapper")
 public class GhostFrameBackendApplication {
 
   public static void main(String[] args) {

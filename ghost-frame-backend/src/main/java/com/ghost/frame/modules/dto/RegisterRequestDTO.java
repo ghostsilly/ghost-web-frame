@@ -1,7 +1,7 @@
 package com.ghost.frame.modules.dto;
 
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 /**
@@ -13,16 +13,17 @@ public class RegisterRequestDTO {
     /**
      * 用户名
      */
-    @NotNull
+    @NotBlank(message = "用户名不能为空")
+    @Size(min = 5, max = 20, message = "用户名长度在5到20个字符之间")
     private String username;
     /**
      * 密码
      */
-    @NotNull
+    @NotBlank(message = "密码不能为空")
     private String password;
     /**
      * 昵称
      */
-    @NotNull
+    @NotBlank(message = "昵称不能为空")
     private String nickname;
 }
