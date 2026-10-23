@@ -13,5 +13,5 @@ springdoc:
     - group: "用户模块"
       paths-to-match: '${api}/auth/**'
       packages-to-scan:
-        - com.ghost.frame.modules.entity.User
+        - com.ghost.frame.modules.controller
 

@@ -13,6 +13,7 @@ import com.ghost.frame.modules.enums.UserRole;
 import com.ghost.frame.modules.enums.UserStatus;
 import com.ghost.frame.modules.service.UserService;
 import com.ghost.frame.modules.mapper.UserMapper;
+import com.ghost.frame.modules.vo.LoginRequestVO;
 import com.ghost.frame.security.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -33,7 +34,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
   private JwtUtil jwtUtil;
 
   @Override
-  public String login(LoginRequestDTO loginRequestDTO) {
+  public LoginRequestVO login(LoginRequestDTO loginRequestDTO) {
     User user = userMapper.selectOne(
         new LambdaQueryWrapper<User>()
             .eq(User::getUsername, loginRequestDTO.getUsername())
@@ -46,11 +47,17 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     if (user.getStatus().equals(UserStatus.LOCKED)){
       throw new BusinessException(ErrorCode.USER_DISABLED);
     }
-    return jwtUtil.generateToken(user.getId(), user.getUsername());
+    return new LoginRequestVO(
+        user.getId(), 
+        user.getNickname(), 
+        user.getUsername(), 
+        user.getRole(), 
+        jwtUtil.generateToken(user.getId(), user.getUsername())
+    );
   }
 
   @Override
-  public String register(RegisterRequestDTO registerRequestDTO) {
+  public LoginRequestVO register(RegisterRequestDTO registerRequestDTO) {
     User userOne = userMapper.selectOne(
         new LambdaQueryWrapper<User>().eq(User::getUsername, registerRequestDTO.getUsername())
     );
@@ -79,8 +86,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
       userMapper.update(
           user, new LambdaQueryWrapper<User>().eq(User::getId, userOne.getId())
       );
-      
-      return jwtUtil.generateToken(user.getId(), user.getUsername());
+
+      return new LoginRequestVO(
+          user.getId(),
+          user.getNickname(),
+          user.getUsername(),
+          user.getRole(),
+          jwtUtil.generateToken(user.getId(), user.getUsername())
+      );
     }
     
     user.setNickname(registerRequestDTO.getNickname());
@@ -91,8 +104,19 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     user.setDeleted(DeleteFlag.NOT_DELETED);
     
     userMapper.insert(user);
-    
-    return jwtUtil.generateToken(user.getId(), user.getUsername());
+
+    return new LoginRequestVO(
+        user.getId(),
+        user.getNickname(),
+        user.getUsername(),
+        user.getRole(),
+        jwtUtil.generateToken(user.getId(), user.getUsername())
+    );
+  }
+
+  @Override
+  public LoginRequestVO obtainTheCurrentUser(Long userId) {
+    return userMapper.getUserInformation(userId);
   }
 }
 

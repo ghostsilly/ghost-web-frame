@@ -30,6 +30,7 @@ mybatis-plus:
       logic-delete-value: 1
       logic-not-delete-value: 0
   type-aliases-package: com.ghost.frame.modules
+  mapper-locations: classpath*:com.ghost.frame.modules.mapper/*.xml
 
 # JWT 配置
 jwt:

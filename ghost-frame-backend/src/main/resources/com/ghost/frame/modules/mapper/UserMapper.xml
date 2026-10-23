@@ -17,9 +17,26 @@
             <result property="updatedDate" column="updated_date" />
             <result property="updatedBy" column="updated_by" />
     </resultMap>
-
-    <sql id="Base_Column_List">
-        id,nickname,username,password,role,status,
-        deleted,created_date,created_by,updated_date,updated_by
-    </sql>
+    
+    <!--
+    resultMap可以将查询到的数据映射到对应的Java实体类中
+    property: Java实体类的属性名
+    column: 数据库表的列名
+    -->
+    <resultMap id="LoginRequestVO" type="com.ghost.frame.modules.vo.LoginRequestVO">
+        <id property="id" column="id" />
+        <result property="nickname" column="nickname" />
+        <result property="username" column="username" />
+        <result property="role" column="role" />
+    </resultMap>
+    
+    <!-- 获取用户信息 -->
+    <select id="getUserInformation" resultMap="LoginRequestVO">
+        select id,nickname,username,role from user 
+        <where>
+            <if test="userId != null">
+                id = #{userId}
+            </if>
+        </where>
+    </select>
 </mapper>

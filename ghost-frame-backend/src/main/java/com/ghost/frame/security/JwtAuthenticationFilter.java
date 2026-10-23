@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
@@ -17,10 +18,12 @@ import java.io.IOException;
 import java.util.Collections;
 
 /**
+ * @author 34592
  * JWT 认证过滤器
  */
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtUtil jwtUtil;
 
@@ -33,6 +36,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         @NonNull HttpServletResponse response,
         @NonNull FilterChain filterChain
     ) throws ServletException, IOException {
+        // 从请求头中解析 token
         String token = resolveToken(request);
         if (StringUtils.hasText(token) && jwtUtil.isValid(token)
                 && SecurityContextHolder.getContext().getAuthentication() == null) {
@@ -53,8 +57,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
      */
     private String resolveToken(HttpServletRequest request) {
         String header = request.getHeader("Authorization");
-        if (StringUtils.hasText(header) && header.startsWith("Bearer ")) {
-            return header.substring(7);
+        if (StringUtils.hasText(header)) {
+            return header;
         }
         return null;
     }

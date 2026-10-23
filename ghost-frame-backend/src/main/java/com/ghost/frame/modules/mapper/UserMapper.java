@@ -2,6 +2,7 @@ package com.ghost.frame.modules.mapper;
 
 import com.ghost.frame.modules.entity.User;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.ghost.frame.modules.vo.LoginRequestVO;
 
 /**
 * @author 34592
@@ -11,6 +12,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 */
 public interface UserMapper extends BaseMapper<User> {
 
+  LoginRequestVO getUserInformation(Long userId);
 }
 
 

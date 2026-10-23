@@ -4,6 +4,7 @@ import com.ghost.frame.modules.dto.LoginRequestDTO;
 import com.ghost.frame.modules.dto.RegisterRequestDTO;
 import com.ghost.frame.modules.entity.User;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.ghost.frame.modules.vo.LoginRequestVO;
 import jakarta.validation.Valid;
 
 /**
@@ -13,7 +14,9 @@ import jakarta.validation.Valid;
 */
 public interface UserService extends IService<User> {
 
-  String login(@Valid LoginRequestDTO loginRequestDTO);
+  LoginRequestVO login(@Valid LoginRequestDTO loginRequestDTO);
 
-  String register(@Valid RegisterRequestDTO registerRequestDTO);
+  LoginRequestVO register(@Valid RegisterRequestDTO registerRequestDTO);
+
+  LoginRequestVO obtainTheCurrentUser(Long userId);
 }
