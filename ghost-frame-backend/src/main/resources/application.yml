@@ -36,3 +36,6 @@ mybatis-plus:
 jwt:
   secret: ${jwt.jwt-secret}
   expiration-ms: 43200000   #  半天
+
+# API 统一前缀
+api: /ghost

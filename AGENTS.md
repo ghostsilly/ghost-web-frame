@@ -9,8 +9,8 @@
 | 层 | 选型 | 状态 |
 | --- | --- | --- |
 | 后端 | Java 17 + Spring Boot 3.5.16 + Maven | 已接入 Web / Validation / Security |
-| 前端 | Vue 3 + Vite | 未初始化（空目录） |
-| 数据库 | MySQL + MyBatis-Plus 3.5.9 | 已接入，实体与 Mapper 已写，缺建表脚本 |
+| 前端 | Vue 3 + Vite | 已初始化（Vite 空壳，deps 已装，src 待建） |
+| 数据库 | MySQL + MyBatis-Plus 3.5.9 | 已接入，实体与 Mapper 已写，建表 SQL 已落地 |
 | 鉴权 | JWT（jjwt 0.12.6）+ Spring Security | 已接入过滤器与配置 |
 | 接口文档 | knife4j 4.5.0 + springdoc-openapi 2.7.0 | 已接入 |
 | 工具库 | Hutool 5.8.47、Lombok | 已引入 |
@@ -26,7 +26,10 @@ ghost-web-frame/
 ├── .gitattributes / .gitignore
 ├── ghost-frame-backend/
 │   ├── pom.xml
-│   ├── mvnw / mvnw.cmd（尚未 git add）
+│   ├── mvnw / mvnw.cmd / .mvn/（尚未 git add）
+│   ├── data_table/                    # 表结构脚本（见下方规范）
+│   │   ├── README.md
+│   │   └── schema/user.sql            # user 表全量建表 SQL
 │   └── src/
 │       ├── main/
 │       │   ├── java/com/ghost/frame/
@@ -34,35 +37,40 @@ ghost-web-frame/
 │       │   │   ├── common/
 │       │   │   │   ├── Response.java                 # 统一响应体
 │       │   │   │   ├── GlobalExceptionHandler.java
-│       │   │   │   ├── BusinessException.java
 │       │   │   │   ├── MyMetaObjectHandler.java      # 自动填充 create/update 字段
-│       │   │   │   └── enums/ErrorCode.java
+│       │   │   │   ├── enums/ErrorCode.java
+│       │   │   │   └── exception/BusinessException.java
 │       │   │   ├── config/
 │       │   │   │   └── OpenApiConfig.java            # knife4j / springdoc
 │       │   │   ├── security/
-│       │   │   │   ├── SecurityConfig.java
+│       │   │   │   ├── SecurityConfig.java           # 过滤链 + CORS
 │       │   │   │   ├── JwtAuthenticationFilter.java
 │       │   │   │   └── JwtUtil.java
 │       │   │   └── modules/                          # 按层分包（见下方说明）
 │       │   │       ├── controller/
-│       │   │       │   ├── HealthController.java     # GET /api/health
-│       │   │       │   └── LoginRegisterController.java  # POST ${api}/auth/login、/register
+│       │   │       │   ├── BaseController.java       # getUserId() 取当前登录用户
+│       │   │       │   └── LoginRegisterController.java  # /ghost/auth/login、/register、/me
 │       │   │       ├── service/ (+ impl/)            # UserService / UserServiceImpl
 │       │   │       ├── entity/                      # User、BaseEntity
 │       │   │       ├── mapper/                       # UserMapper
 │       │   │       ├── dto/                          # LoginRequestDTO、RegisterRequestDTO
+│       │   │       ├── vo/                           # LoginRequestVO
 │       │   │       └── enums/                      # UserRole、UserStatus、DeleteFlag
 │       │   └── resources/
-│       │       ├── application.yml                 # 默认配置，profile=local
+│       │       ├── application.yml                 # 默认配置，profile=local，含 api: /ghost
 │       │       ├── application-local.yml            # 本机私有配置（不入库）
 │       │       ├── application-local.yml.example
 │       │       ├── config/application-knife4j.yml
-│       │       └── com/ghost/frame/modules/mapper/UserMapper.xml   # 见"已知问题"
+│       │       └── com/ghost/frame/modules/mapper/UserMapper.xml   # 已配 mapper-locations
 │       └── test/java/com/ghost/frame/GhostFrameBackendApplicationTests.java
-└── ghost-frame-frontend/     # 空目录，待 Vite 初始化
+└── ghost-frame-frontend/
+    ├── package.json / package-lock.json              # vue-router / pinia / axios 已装
+    ├── vite.config.js                                # 代理 /ghost → localhost:8080
+    ├── index.html
+    └── src/                                          # 仍是 Vite 默认模板（App.vue / HelloWorld.vue）
 ```
 
-**尚未创建：** 根目录 `README.md`、数据库建表 SQL / Flyway 脚本。
+**尚未创建：** 根目录 `README.md`、前端业务代码（`src/api`、`router`、`views`、`stores`、`utils`）。
 
 ---
 
@@ -73,20 +81,23 @@ ghost-web-frame/
 ```text
 com.ghost.frame
 ├── common/          # Response、GlobalExceptionHandler、BusinessException、ErrorCode、MyMetaObjectHandler
-├── config/         # OpenApiConfig（后续放 WebMvc、CORS、Jackson）
-├── security/       # SecurityFilterChain、JwtAuthenticationFilter、JwtUtil
+│   ├── enums/       # ErrorCode
+│   └── exception/   # BusinessException
+├── config/         # OpenApiConfig（后续放 WebMvc、Jackson）
+├── security/       # SecurityFilterChain（含 CORS）、JwtAuthenticationFilter、JwtUtil
 └── modules/
-    ├── controller/  # 所有 REST 控制器
+    ├── controller/  # 所有 REST 控制器（BaseController 提供 getUserId()）
     ├── service/     # 业务接口，impl/ 放实现
     ├── entity/      # 数据库实体（含 BaseEntity 公共字段）
     ├── mapper/      # MyBatis-Plus Mapper 接口
-    ├── dto/         # 请求 / 响应 DTO
+    ├── dto/         # 请求 DTO
+    ├── vo/          # 响应 VO
     └── enums/       # 业务枚举
 ```
 
 原则不变：横切能力进 `common` / `config` / `security`，业务进 `modules`。新增业务时继续按层在 `modules/` 下加包，不要回退到按业务拆子包。
 
-API 统一前缀：`/api/**`。
+API 统一前缀：`/ghost/**`（前后端一致，由 `${api}` 配置注入）。
 
 ---
 
@@ -95,27 +106,29 @@ API 统一前缀：`/api/**`。
 ### 已完成
 
 - 统一响应体 `Response<T>` + 全局异常 `GlobalExceptionHandler` + `BusinessException` + `ErrorCode`
-- `GET /api/health` 健康检查
 - MySQL 数据源 + MyBatis-Plus（含逻辑删除 `deleted`、下划线转驼峰、`id-type: auto`）
 - `User` / `BaseEntity` 实体、`UserMapper`、`MyMetaObjectHandler` 自动填充
 - Spring Security 过滤链 + `JwtUtil` + `JwtAuthenticationFilter`（Bearer Token 解析）
-- `POST /api/auth/register`、`POST /api/auth/login`（BCrypt 密码、返回 JWT）
+- `POST /ghost/auth/register`、`POST /ghost/auth/login`（BCrypt 密码、返回 JWT）
+- `GET /ghost/auth/me`（当前登录用户，经 `BaseController.getUserId()` 从 `SecurityContextHolder` 取 id）
+- CORS 已配置（`SecurityConfig.corsConfigurationSource` 放行 `http://localhost:5173`）
 - knife4j 接口文档（已强制覆盖 springdoc 到 2.7.0 兼容 Spring Framework 6.2.x）
+- 建表 SQL 已落地：`data_table/schema/user.sql`
 - `application-local.yml` 已落地，`application.yml` 通过 `${mysql.username}` / `${mysql.password}` / `${jwt.jwt-secret}` 注入敏感值
 
 ### 尚未实现
 
-- `GET /api/auth/me`（当前登录用户信息）
-- CORS 配置（后续前端 `localhost:5173` 需要放行）
-- 建表 SQL（`user` 表结构未在仓库中维护）
 - 单元测试 / 集成测试（只有默认上下文加载测试）
 - 登出、Token 刷新、权限注解（`@PreAuthorize`）
+- 前端业务页面（登录/注册/首页、路由守卫、axios 拦截器）
 
 ---
 
 ## 前端现状（ghost-frame-frontend）
 
-目录已创建，**尚未执行** `npm create vite`。无 `package.json`、无源码。
+Vite 已初始化，`package.json` 已含 `vue-router` / `pinia` / `axios`。`vite.config.js` 已配代理 `/ghost` → `http://localhost:8080`。
+
+`src` 目前仍是 Vite 默认模板（`App.vue` / `main.js` / `components/HelloWorld.vue`），**尚未创建** `src/api`、`src/router`、`src/views`、`src/stores`、`src/utils`，也无登录/注册页面。
 
 ---
 
@@ -124,10 +137,10 @@ API 统一前缀：`/api/**`。
 | 阶段 | 内容 | 状态 |
 | --- | --- | --- |
 | 0 | 仓库结构、根 `.gitignore`、git 仓库 | 已完成（mvnw 等尚未入库） |
-| 1 | 后端空壳：统一响应、异常、`/api/health` | 已完成 |
-| 2 | MySQL + MyBatis-Plus + `User` 表 | 部分完成（代码已写，**缺建表 SQL**） |
-| 3 | JWT 鉴权：注册 / 登录 / `/me` | 部分完成（注册/登录已通，**缺 `/me`、缺 CORS**） |
-| 4 | 前端 Vite 空壳 + axios 代理 | 未开始 |
+| 1 | 后端空壳：统一响应、异常 | 已完成（早期 `/api/health` 已随前缀调整移除） |
+| 2 | MySQL + MyBatis-Plus + `user` 表 | 已完成（含建表 SQL `data_table/schema/user.sql`） |
+| 3 | JWT 鉴权：注册 / 登录 / `/me` | 已完成（含 CORS 放行 `localhost:5173`） |
+| 4 | 前端 Vite 壳 + axios 代理 | 部分完成（Vite + 依赖 + 代理已就绪，`src` 仍默认模板） |
 | 5 | 前端登录页 + 路由守卫 + 联调 | 未开始 |
 | 6 | 权限扩展、日志、测试、Flyway 等 | 未开始 |
 
@@ -135,14 +148,9 @@ API 统一前缀：`/api/**`。
 
 ## 已知问题与约束（改动前必读）
 
-1. **`${api}` 占位符必须解析成功**：`LoginRegisterController` 使用 `@RequestMapping("${api}/auth")`。`application.yml` 与 `application-local.yml` 都必须定义 `api: /api`，否则启动报 `Could not resolve placeholder 'api'`。
-2. **`UserMapper.xml` 当前位置不会被 MyBatis-Plus 默认扫描**：文件在 `resources/com/ghost/frame/modules/mapper/` 下。若后续在 XML 里写自定义 SQL，需在 `application.yml` 加：
-   ```yaml
-   mybatis-plus:
-     mapper-locations: classpath*:com/ghost/frame/modules/mapper/*.xml
-   ```
-   或迁移到 `resources/mapper/` 下并配置 `classpath*:mapper/*.xml`。
-3. **数据库名实际为 `silly_ghost_frame`**（不是早期建议的 `ghost_frame`）。本机需手动建库 + 建 `user` 表，否则注册/登录必失败。
+1. **`${api}` 占位符必须解析成功**：`LoginRegisterController` 使用 `@RequestMapping("${api}/auth")`，**API 统一前缀为 `/ghost`**。`application.yml` 与 `application-local.yml` **都已定义** `api: /ghost`；若改动前缀，两处必须同步，否则启动报 `Could not resolve placeholder 'api'` 或前后端不一致。
+2. **`UserMapper.xml` 扫描已配置**：文件在 `resources/com/ghost/frame/modules/mapper/` 下，`application.yml` 已加 `mybatis-plus.mapper-locations: classpath*:com.ghost.frame.modules.mapper/*.xml`，无需再改。
+3. **数据库名实际为 `silly_ghost_frame`**（不是早期建议的 `ghost_frame`）。本机需手动建库 + 建 `user` 表（`data_table/schema/user.sql`），否则注册/登录必失败。
 4. **JWT 有效期 12 小时**（`jwt.expiration-ms: 43200000`），Secret 从环境变量 `jwt.jwt-secret` 注入，不入库。
 5. **未提交文件**：`.gitattributes`、`ghost-frame-backend/mvnw`、`mvnw.cmd`、`.mvn/` 处于 untracked，下次提交一并入库。
 
@@ -163,33 +171,25 @@ API 统一前缀：`/api/**`。
 
 ## 下一步（建议顺序）
 
-### 1. 收尾阶段 2 / 3 的缺口
+### 1. 前端阶段 5：登录页 + 路由守卫 + 联调（当前最优先）
 
-1. 写 `user` 表建表 SQL（可放 `ghost-frame-backend/src/main/resources/db/schema.sql`，后续再迁 Flyway）。
-2. 在 `LoginRegisterController` 补 `GET /me`，从 `SecurityContextHolder` 取当前用户返回。
-3. 加 `config/CorsConfig.java`（或在 `SecurityConfig` 中配置 CORS），放行 `http://localhost:5173`。
-4. 确认 `application-local.yml` 已定义 `api: /api`。
+1. 建目录 `src/api`、`src/router`、`src/views`、`src/stores`、`src/utils`。
+2. 登录页、注册页、首页。
+3. 路由守卫 + pinia 存 token + axios 拦截器（自动带 token、401 跳登录）。
+4. 全链路联调：注册 → 登录 → `/me` → 刷新保持登录 → 登出。
 
-**验收：** `./mvnw spring-boot:run` 启动成功；knife4j 文档页 `http://localhost:8080/doc.html` 可见；`POST /api/auth/register` → `POST /api/auth/login` → `GET /api/auth/me` 全链路通。
+**验收：** 注册 → 登录 → 首页 → 刷新保持登录 → 登出。后端接口前缀 `/ghost`，Vite 代理 `/ghost` → `http://localhost:8080`。
 
-### 2. 初始化前端（阶段 4–5）
-
-```bash
-cd ghost-frame-frontend
-npm create vite@latest . -- --template vue
-npm install vue-router pinia axios
-```
-
-- 目录：`src/api`、`src/views`、`src/router`、`src/stores`、`src/utils`
-- Vite 代理：`/api` → `http://localhost:8080`
-- axios 自动带 token；401 跳转登录
-
-**验收：** 注册 → 登录 → 首页 → 刷新保持登录 → 登出。
-
-### 3. 补全根目录
+### 2. 补全根目录
 
 - 添加 `README.md`（JDK 17、Maven、Node、MySQL 版本与启动步骤）
 - 把 `mvnw` / `mvnw.cmd` / `.mvn/` / `.gitattributes` 加入版本控制
+
+### 3. 阶段 6（后续）
+
+- 单元/集成测试（`UserService` 登录/注册）
+- 登出、Token 刷新、`@PreAuthorize` 权限注解
+- 日志、Flyway 迁移
 
 ---
 
@@ -211,7 +211,7 @@ npm install vue-router pinia axios
 - 修改代码时**不改动无关文件**；保持现有包名 `com.ghost.frame` 与按层分包结构。
 - 密钥、数据库密码不进仓库；本地配置用 `application-local.yml` 或环境变量。
 - 问答与请求权限用中文；代码注释保持简洁，仅解释非显而易见的逻辑。
-- 当前最优先任务：**收尾阶段 2/3 缺口**（建表 SQL + `/me` + CORS），再进入前端初始化。
+- 当前最优先任务：**前端阶段 5**（登录页 + 路由守卫 + 联调），后端阶段 2/3 已收尾完成。
 
 ---
 
@@ -219,7 +219,7 @@ npm install vue-router pinia axios
 
 ```text
 浏览器 (localhost:5173)
-    ↓ Vite 代理 /api
+    ↓ Vite 代理 /ghost
 Spring Boot (localhost:8080)
     ↓ JWT 过滤器
 modules (controller → service → mapper)
