@@ -9,7 +9,7 @@
 | 层 | 选型 | 状态 |
 | --- | --- | --- |
 | 后端 | Java 17 + Spring Boot 3.5.16 + Maven | 已接入 Web / Validation / Security |
-| 前端 | Vue 3 + Vite | 已初始化（Vite 空壳，deps 已装，src 待建） |
+| 前端 | Vue 3 + Vite | 登录 / 注册 / 首页、axios、Pinia、路由守卫已落地 |
 | 数据库 | MySQL + MyBatis-Plus 3.5.9 | 已接入，实体与 Mapper 已写，建表 SQL 已落地 |
 | 鉴权 | JWT（jjwt 0.12.6）+ Spring Security | 已接入过滤器与配置 |
 | 接口文档 | knife4j 4.5.0 + springdoc-openapi 2.7.0 | 已接入 |
@@ -64,13 +64,25 @@ ghost-web-frame/
 │       │       └── com/ghost/frame/modules/mapper/UserMapper.xml   # 已配 mapper-locations
 │       └── test/java/com/ghost/frame/GhostFrameBackendApplicationTests.java
 └── ghost-frame-frontend/
-    ├── package.json / package-lock.json              # vue-router / pinia / axios 已装
-    ├── vite.config.js                                # 代理 /ghost → localhost:8080
+    ├── package.json / package-lock.json              # vue 3.5 / vite 8 / vue-router 4.6 / pinia 4.1 / axios 1.20
+    ├── vite.config.js                                # 代理 /ghost → localhost:8080，port 5173
     ├── index.html
-    └── src/                                          # 仍是 Vite 默认模板（App.vue / HelloWorld.vue）
+    ├── public/favicon.svg、public/icons.svg
+    └── src/
+        ├── main.js                                   # 已 use(pinia)、use(router)
+        ├── App.vue                                   # <router-view />
+        ├── style.css
+        ├── api/request.js                            # axios + Bearer + 解包 Response + 401
+        ├── api/auth.js                               # login / register / getMe
+        ├── router/index.js                           # / /login /register + beforeEach
+        ├── stores/user.js                            # token 持久化、login / register / fetchMe / logout
+        ├── views/HomeView.vue                        # 展示当前用户，刷新时 fetchMe
+        └── views/login/LoginView.vue、RegisterView.vue
 ```
 
-**尚未创建：** 根目录 `README.md`、前端业务代码（`src/api`、`router`、`views`、`stores`、`utils`）。
+**已删除（Vite 默认模板）：** `src/components/HelloWorld.vue`、`src/assets/{hero.png, vite.svg, vue.svg}`。
+
+**尚未创建：** 根目录 `README.md`。token 存在 `localStorage`（键 `ghost-token`），不需要单独的 `src/utils/`。
 
 ---
 
@@ -119,16 +131,35 @@ API 统一前缀：`/ghost/**`（前后端一致，由 `${api}` 配置注入）�
 ### 尚未实现
 
 - 单元测试 / 集成测试（只有默认上下文加载测试）
-- 登出、Token 刷新、权限注解（`@PreAuthorize`）
-- 前端业务页面（登录/注册/首页、路由守卫、axios 拦截器）
+- 登出接口、Token 刷新、权限注解（`@PreAuthorize`）
+- 日志、Flyway
 
 ---
 
 ## 前端现状（ghost-frame-frontend）
 
-Vite 已初始化，`package.json` 已含 `vue-router` / `pinia` / `axios`。`vite.config.js` 已配代理 `/ghost` → `http://localhost:8080`。
+**已就绪（可用）：**
 
-`src` 目前仍是 Vite 默认模板（`App.vue` / `main.js` / `components/HelloWorld.vue`），**尚未创建** `src/api`、`src/router`、`src/views`、`src/stores`、`src/utils`，也无登录/注册页面。
+- `package.json` 依赖齐全：`vue ^3.5.44`、`vue-router ^4.6.4`、`pinia ^4.1.0`、`axios ^1.20.0`；devDeps `vite ^8.3.4`、`@vitejs/plugin-vue ^6.0.10`
+- `vite.config.js` 代理已配：`/ghost` → `http://localhost:8080`，`host: true`、`port: 5173`
+- 目录骨架已建：`src/api`、`src/router`、`src/stores`、`src/views`（含 `views/login/`）
+- Vite 默认模板已清理：删除 `components/HelloWorld.vue`、`assets/{hero.png, vite.svg, vue.svg}`
+
+**已实现：**
+
+| 文件 | 当前状态 |
+| --- | --- |
+| `src/main.js` | `createApp(App).use(pinia).use(router).mount('#app')`，Pinia 在 Router 之前 |
+| `src/App.vue` | 模板为 `<router-view />` |
+| `src/api/request.js` | `baseURL: '/ghost'`；请求带 `Authorization: Bearer`；业务码 200 解包 `data`；401 清 `ghost-token` 并跳登录 |
+| `src/api/auth.js` | `login` / `register` / `getMe` |
+| `src/stores/user.js` | token 写入 `localStorage`；`login`、`register` 写入用户信息；`fetchMe` 合并 `/me`；`logout` 只清本地 |
+| `src/router/index.js` | `/`、`/login`、`/register`；`beforeEach`：无 token 去登录并带 `redirect`；已登录访问登录/注册回首页 |
+| `src/views/login/LoginView.vue` | 登录表单，成功后按 `redirect` 回跳 |
+| `src/views/login/RegisterView.vue` | 注册表单，校验与 `RegisterRequestDTO` 对齐，成功后自动登录 |
+| `src/views/HomeView.vue` | 展示昵称、用户名、角色；刷新且无 `userInfo` 时调用 `fetchMe`；登出后回 `/login` |
+
+人工验收（注册 → 登录 → 首页 → 刷新仍显示用户 → 登出后再进首页被拦住）尚未在浏览器走完。
 
 ---
 
@@ -140,9 +171,9 @@ Vite 已初始化，`package.json` 已含 `vue-router` / `pinia` / `axios`。`vi
 | 1 | 后端空壳：统一响应、异常 | 已完成（早期 `/api/health` 已随前缀调整移除） |
 | 2 | MySQL + MyBatis-Plus + `user` 表 | 已完成（含建表 SQL `data_table/schema/user.sql`） |
 | 3 | JWT 鉴权：注册 / 登录 / `/me` | 已完成（含 CORS 放行 `localhost:5173`） |
-| 4 | 前端 Vite 壳 + axios 代理 | 部分完成（Vite + 依赖 + 代理已就绪，`src` 仍默认模板） |
-| 5 | 前端登录页 + 路由守卫 + 联调 | 未开始 |
-| 6 | 权限扩展、日志、测试、Flyway 等 | 未开始 |
+| 4 | 前端 Vite 壳 + axios 代理 | 已完成（依赖、代理、目录骨架均就绪） |
+| 5 | 前端登录页 + 路由守卫 + 联调 | 代码已落地；全链路人工验收未完成 |
+| 6 | 登出与刷新 Token、权限注解、测试、日志、Flyway | 未开始 |
 
 ---
 
@@ -152,7 +183,9 @@ Vite 已初始化，`package.json` 已含 `vue-router` / `pinia` / `axios`。`vi
 2. **`UserMapper.xml` 扫描已配置**：文件在 `resources/com/ghost/frame/modules/mapper/` 下，`application.yml` 已加 `mybatis-plus.mapper-locations: classpath*:com.ghost.frame.modules.mapper/*.xml`，无需再改。
 3. **数据库名实际为 `silly_ghost_frame`**（不是早期建议的 `ghost_frame`）。本机需手动建库 + 建 `user` 表（`data_table/schema/user.sql`），否则注册/登录必失败。
 4. **JWT 有效期 12 小时**（`jwt.expiration-ms: 43200000`），Secret 从环境变量 `jwt.jwt-secret` 注入，不入库。
-5. **未提交文件**：`.gitattributes`、`ghost-frame-backend/mvnw`、`mvnw.cmd`、`.mvn/` 处于 untracked，下次提交一并入库。
+5. **阶段 5 代码仍在工作区**（截至 2026-10-24）：前端业务文件已有实现，但尚未作为一次提交入库。`mvnw` / `mvnw.cmd` / `.mvn/` 以及根目录、后端的 `.gitattributes` 仍未 `git add`。不要把 `application-local.yml` 提交进去。
+6. **`.idea/` 已被忽略**：根 `.gitignore` 第 11 行 `.idea/` 同时覆盖了 `ghost-frame-backend/.idea/`，`git ls-files` 无 IDE 配置污染，无需处理。
+7. **前端可以打开页面**：`npm run dev` 默认端口 5173。未登录访问 `/` 会到 `/login?redirect=/`。后端需在 8080 启动，否则登录、注册、`fetchMe` 会失败。
 
 ---
 
@@ -171,25 +204,27 @@ Vite 已初始化，`package.json` 已含 `vue-router` / `pinia` / `axios`。`vi
 
 ## 下一步（建议顺序）
 
-### 1. 前端阶段 5：登录页 + 路由守卫 + 联调（当前最优先）
+### 1. 收尾阶段 5 验收
 
-1. 建目录 `src/api`、`src/router`、`src/views`、`src/stores`、`src/utils`。
-2. 登录页、注册页、首页。
-3. 路由守卫 + pinia 存 token + axios 拦截器（自动带 token、401 跳登录）。
-4. 全链路联调：注册 → 登录 → `/me` → 刷新保持登录 → 登出。
+在 5173 与 8080 都已启动时走一遍：注册 → 登录进首页并能看到昵称 → 刷新后仍显示同一用户 → 登出后再打开 `/` 被拦到登录页。通过后再进入阶段 6。
 
-**验收：** 注册 → 登录 → 首页 → 刷新保持登录 → 登出。后端接口前缀 `/ghost`，Vite 代理 `/ghost` → `http://localhost:8080`。
+### 2. 阶段 6：鉴权补齐与可重复构建
 
-### 2. 补全根目录
+做到下面这些即算本阶段完成：
 
-- 添加 `README.md`（JDK 17、Maven、Node、MySQL 版本与启动步骤）
+1. **登出**：`POST /ghost/auth/logout`。当前 JWT 无状态，接口只需校验已登录并返回成功；前端 `logout` 先调该接口，无论成败都清本地 token 并回 `/login`。
+2. **刷新 Token**：登录响应增加 `refreshToken`（有效期长于 12 小时的 access token）。`POST /ghost/auth/refresh` 用 refresh token 换新的 access token。axios 在 access token 过期（401）时尝试刷新一次，失败再清 token 跳登录。refresh token 与 access token 一样不入库明文日志。
+3. **权限注解**：开启方法安全。`/me` 要求已认证；预留一个仅 `ADMIN` 可访问的示例接口（或在现有用户接口上按 `UserRole` 限制），未授权返回统一 `Response`，前端不必做管理页。
+4. **测试**：`UserService` 注册（重复用户名失败）、登录（密码错误失败、成功签发 token）有测试覆盖。可用测试库或 mock Mapper，不依赖本机 `application-local.yml` 里的密码。
+5. **日志**：登录成功与失败打业务日志，不打印密码和完整 token。
+6. **Flyway**：用 Flyway 执行 `data_table/schema/user.sql` 的等价迁移，新环境启动即可建表。全量脚本规范不变：之后改表仍要同步 `schema/` 与 `migration/`。
+
+**验收：** 登录后等到 access token 失效仍能通过 refresh 继续调用 `/me`；登出后旧 access token 访问 `/me` 失败（若尚未做服务端吊销，则以前端清 token、再请求不再带 Authorization 为准，并在代码注释里写明 JWT 在过期前仍然有效）；非管理员访问管理员示例接口得到统一错误体；`mvn test` 通过。
+
+### 3. 仓库补齐（可与阶段 6 并行）
+
+- 添加根目录 `README.md`（JDK 17、Maven、Node、MySQL 版本与启动步骤）
 - 把 `mvnw` / `mvnw.cmd` / `.mvn/` / `.gitattributes` 加入版本控制
-
-### 3. 阶段 6（后续）
-
-- 单元/集成测试（`UserService` 登录/注册）
-- 登出、Token 刷新、`@PreAuthorize` 权限注解
-- 日志、Flyway 迁移
 
 ---
 
@@ -211,7 +246,8 @@ Vite 已初始化，`package.json` 已含 `vue-router` / `pinia` / `axios`。`vi
 - 修改代码时**不改动无关文件**；保持现有包名 `com.ghost.frame` 与按层分包结构。
 - 密钥、数据库密码不进仓库；本地配置用 `application-local.yml` 或环境变量。
 - 问答与请求权限用中文；代码注释保持简洁，仅解释非显而易见的逻辑。
-- 当前最优先任务：**前端阶段 5**（登录页 + 路由守卫 + 联调），后端阶段 2/3 已收尾完成。
+- 当前最优先任务：人工走完阶段 5 验收，然后做**阶段 6**（登出、刷新 Token、`@PreAuthorize`、`UserService` 测试、登录日志、Flyway）。
+- 进度基线核对时间：2026-10-24。阶段 5 的页面、store、拦截器和路由守卫已在工作区，尚未提交。
 
 ---
 
