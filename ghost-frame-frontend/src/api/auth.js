@@ -14,3 +14,8 @@ export function register(data) {
 export function getMe(config) {
     return request.get('/auth/me', config)
 }
+
+/** 登出：POST /ghost/auth/logout。接口未就绪时调用方仍会清本地登录态。 */
+export function logout(config) {
+    return request.post('/auth/logout', null, config)
+}

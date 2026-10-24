@@ -1,12 +1,13 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import { login as loginApi, register as registerApi, getMe } from '../api/auth'
-import { TOKEN_KEY } from '../api/request'
+import { login as loginApi, register as registerApi, getMe, logout as logoutApi } from '../api/auth'
+import { REFRESH_TOKEN_KEY, TOKEN_KEY } from '../api/request'
 
 export const useUserStore = defineStore('user', () => {
     // ===== state =====
     // 初始化时从 localStorage 读回，这样刷新页面不会掉登录态
     const token = ref(localStorage.getItem(TOKEN_KEY) || '')
+    const refreshToken = ref(localStorage.getItem(REFRESH_TOKEN_KEY) || '')
     const userInfo = ref(null)
 
     // ===== getters =====
@@ -19,16 +20,28 @@ export const useUserStore = defineStore('user', () => {
         localStorage.setItem(TOKEN_KEY, newToken)
     }
 
+    function setRefreshToken(newToken) {
+        refreshToken.value = newToken || ''
+        if (newToken) {
+            localStorage.setItem(REFRESH_TOKEN_KEY, newToken)
+        } else {
+            localStorage.removeItem(REFRESH_TOKEN_KEY)
+        }
+    }
+
     function clear() {
         token.value = ''
+        refreshToken.value = ''
         userInfo.value = null
         localStorage.removeItem(TOKEN_KEY)
+        localStorage.removeItem(REFRESH_TOKEN_KEY)
     }
 
     // ===== actions =====
     async function login(payload) {
         const data = await loginApi(payload)
         setToken(data.token)
+        setRefreshToken(data.refreshToken)
         userInfo.value = data
         return data
     }
@@ -36,6 +49,7 @@ export const useUserStore = defineStore('user', () => {
     async function register(payload) {
         const data = await registerApi(payload)
         setToken(data.token)
+        setRefreshToken(data.refreshToken)
         userInfo.value = data
         return data
     }
@@ -48,12 +62,17 @@ export const useUserStore = defineStore('user', () => {
         return userInfo.value
     }
 
-    function logout() {
+    async function logout() {
+        try {
+            await logoutApi({ skipAuthRedirect: true, skipRefresh: true })
+        } catch {
+            // 登出接口尚未提供或 token 已失效时，仍然清掉本地登录态
+        }
         clear()
     }
 
     return {
-        token, userInfo,
+        token, refreshToken, userInfo,
         isLoggedIn, nickname,
         login, register, fetchMe, logout,
     }

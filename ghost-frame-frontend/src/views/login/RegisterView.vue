@@ -15,30 +15,37 @@ const form = reactive({
 
 const loading = ref(false)
 const errorMsg = ref('')
+const errorField = ref('')
+
+function setError(field, message) {
+  errorField.value = field
+  errorMsg.value = message
+}
 
 async function handleSubmit() {
   if (loading.value) return
   errorMsg.value = ''
+  errorField.value = ''
 
   // 校验规则与后端 RegisterRequestDTO 的注解逐条对齐
   if (!form.username) {
-    errorMsg.value = '请输入用户名'
+    setError('username', '请输入用户名')
     return
   }
   if (form.username.length < 5 || form.username.length > 20) {
-    errorMsg.value = '用户名长度需在 5 到 20 个字符之间'
+    setError('username', '用户名长度需在 5 到 20 个字符之间')
     return
   }
   if (!form.nickname) {
-    errorMsg.value = '请输入昵称'
+    setError('nickname', '请输入昵称')
     return
   }
   if (!form.password) {
-    errorMsg.value = '请输入密码'
+    setError('password', '请输入密码')
     return
   }
   if (form.password !== form.confirmPassword) {
-    errorMsg.value = '两次输入的密码不一致'
+    setError('confirm', '两次输入的密码不一致')
     return
   }
 
@@ -52,7 +59,7 @@ async function handleSubmit() {
     })
     router.push('/')
   } catch (err) {
-    errorMsg.value = err.message || '注册失败，请稍后重试'
+    setError('username', err.message || '注册失败，请稍后重试')
   } finally {
     loading.value = false
   }
@@ -65,31 +72,45 @@ async function handleSubmit() {
       <h1>注册</h1>
       <p class="auth-sub">创建一个新账号，注册成功后自动登录。</p>
 
-      <p v-if="errorMsg" class="auth-error">{{ errorMsg }}</p>
-
       <form @submit.prevent="handleSubmit">
         <div class="field">
           <label for="reg-username">用户名</label>
           <input id="reg-username" v-model.trim="form.username" type="text" autocomplete="username"
-            placeholder="5–20 个字符" />
+            placeholder="5–20 个字符"
+            :class="{ 'input-invalid': errorField === 'username' }"
+            :aria-invalid="errorField === 'username'"
+            :aria-describedby="errorField === 'username' ? 'reg-username-error' : undefined" />
+          <p v-if="errorField === 'username'" id="reg-username-error" class="field-error">{{ errorMsg }}</p>
         </div>
 
         <div class="field">
           <label for="reg-nickname">昵称</label>
           <input id="reg-nickname" v-model.trim="form.nickname" type="text" autocomplete="nickname"
-            placeholder="用于展示的昵称" />
+            placeholder="用于展示的昵称"
+            :class="{ 'input-invalid': errorField === 'nickname' }"
+            :aria-invalid="errorField === 'nickname'"
+            :aria-describedby="errorField === 'nickname' ? 'reg-nickname-error' : undefined" />
+          <p v-if="errorField === 'nickname'" id="reg-nickname-error" class="field-error">{{ errorMsg }}</p>
         </div>
 
         <div class="field">
           <label for="reg-password">密码</label>
           <input id="reg-password" v-model="form.password" type="password" autocomplete="new-password"
-            placeholder="请输入密码" />
+            placeholder="请输入密码"
+            :class="{ 'input-invalid': errorField === 'password' }"
+            :aria-invalid="errorField === 'password'"
+            :aria-describedby="errorField === 'password' ? 'reg-password-error' : undefined" />
+          <p v-if="errorField === 'password'" id="reg-password-error" class="field-error">{{ errorMsg }}</p>
         </div>
 
         <div class="field">
           <label for="reg-confirm">确认密码</label>
           <input id="reg-confirm" v-model="form.confirmPassword" type="password" autocomplete="new-password"
-            placeholder="请再次输入密码" />
+            placeholder="请再次输入密码"
+            :class="{ 'input-invalid': errorField === 'confirm' }"
+            :aria-invalid="errorField === 'confirm'"
+            :aria-describedby="errorField === 'confirm' ? 'reg-confirm-error' : undefined" />
+          <p v-if="errorField === 'confirm'" id="reg-confirm-error" class="field-error">{{ errorMsg }}</p>
         </div>
 
         <button type="submit" class="btn-primary" :disabled="loading">

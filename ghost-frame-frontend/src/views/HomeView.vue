@@ -24,15 +24,15 @@ onMounted(async () => {
   try {
     await userStore.fetchMe()
   } catch {
-    userStore.logout()
+    await userStore.logout()
     router.push('/login')
   } finally {
     loading.value = false
   }
 })
 
-function handleLogout() {
-  userStore.logout()
+async function handleLogout() {
+  await userStore.logout()
   router.push('/login')
 }
 </script>

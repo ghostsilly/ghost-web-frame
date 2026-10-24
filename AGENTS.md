@@ -49,7 +49,7 @@ ghost-web-frame/
 │       │   │   └── modules/                          # 按层分包（见下方说明）
 │       │   │       ├── controller/
 │       │   │       │   ├── BaseController.java       # getUserId() 取当前登录用户
-│       │   │       │   └── LoginRegisterController.java  # /ghost/auth/login、/register、/me
+│       │   │       │   └── LoginRegisterController.java  # /ghost/auth/login、/register、/me、/logout
 │       │   │       ├── service/ (+ impl/)            # UserService / UserServiceImpl
 │       │   │       ├── entity/                      # User、BaseEntity
 │       │   │       ├── mapper/                       # UserMapper
@@ -72,8 +72,8 @@ ghost-web-frame/
         ├── main.js                                   # 已 use(pinia)、use(router)
         ├── App.vue                                   # <router-view />
         ├── style.css
-        ├── api/request.js                            # axios + Bearer + 解包 Response + 401
-        ├── api/auth.js                               # login / register / getMe
+        ├── api/request.js                            # axios + Bearer + 解包 Response + 401 时尝试 refresh
+        ├── api/auth.js                               # login / register / getMe / logout
         ├── router/index.js                           # / /login /register + beforeEach
         ├── stores/user.js                            # token 持久化、login / register / fetchMe / logout
         ├── views/HomeView.vue                        # 展示当前用户，刷新时 fetchMe
@@ -82,7 +82,7 @@ ghost-web-frame/
 
 **已删除（Vite 默认模板）：** `src/components/HelloWorld.vue`、`src/assets/{hero.png, vite.svg, vue.svg}`。
 
-根目录已有 `README.md`。token 存在 `localStorage`（键 `ghost-token`），不需要单独的 `src/utils/`。
+根目录已有 `README.md`。access token 键名 `ghost-token`，refresh token 键名 `ghost-refresh-token`，都在 `localStorage`。不需要单独的 `src/utils/`。
 
 ---
 
@@ -123,6 +123,7 @@ API 统一前缀：`/ghost/**`（前后端一致，由 `${api}` 配置注入）�
 - Spring Security 过滤链 + `JwtUtil` + `JwtAuthenticationFilter`（Bearer Token 解析）
 - `POST /ghost/auth/register`、`POST /ghost/auth/login`（BCrypt 密码、返回 JWT）
 - `GET /ghost/auth/me`（当前登录用户，经 `BaseController.getUserId()` 从 `SecurityContextHolder` 取 id）
+- `POST /ghost/auth/logout`（需已登录；JWT 无状态，接口只确认登录并返回成功，不吊销 token）
 - CORS 已配置（`SecurityConfig.corsConfigurationSource` 放行 `http://localhost:5173`）
 - knife4j 接口文档（已强制覆盖 springdoc 到 2.7.0 兼容 Spring Framework 6.2.x）
 - 建表 SQL 已落地：`data_table/schema/user.sql`
@@ -130,9 +131,11 @@ API 统一前缀：`/ghost/**`（前后端一致，由 `${api}` 配置注入）�
 
 ### 尚未实现
 
+- 刷新 Token（`refreshToken` 字段与 `POST /ghost/auth/refresh`）
+- 权限注解（`@PreAuthorize`）与管理员示例接口
+- 登录成功 / 失败业务日志
 - 单元测试 / 集成测试（只有默认上下文加载测试）
-- 登出接口、Token 刷新、权限注解（`@PreAuthorize`）
-- 日志、Flyway
+- Flyway
 
 ---
 
@@ -151,15 +154,15 @@ API 统一前缀：`/ghost/**`（前后端一致，由 `${api}` 配置注入）�
 | --- | --- |
 | `src/main.js` | `createApp(App).use(pinia).use(router).mount('#app')`，Pinia 在 Router 之前 |
 | `src/App.vue` | 模板为 `<router-view />` |
-| `src/api/request.js` | `baseURL: '/ghost'`；请求带 `Authorization: Bearer`；业务码 200 解包 `data`；401 清 `ghost-token` 并跳登录 |
-| `src/api/auth.js` | `login` / `register` / `getMe` |
-| `src/stores/user.js` | token 写入 `localStorage`；`login`、`register` 写入用户信息；`fetchMe` 合并 `/me`；`logout` 只清本地 |
+| `src/api/request.js` | `baseURL: '/ghost'`；请求带 `Authorization: Bearer`；业务码 200 解包 `data`；本地有 `ghost-refresh-token` 时，401 只刷新一次并重放原请求，否则清 token 跳登录 |
+| `src/api/auth.js` | `login` / `register` / `getMe` / `logout` |
+| `src/stores/user.js` | access token 与 refresh token 写入 `localStorage`；`login`、`register` 写入用户信息；`fetchMe` 合并 `/me`；`logout` 先调登出接口，无论成败都清本地 |
 | `src/router/index.js` | `/`、`/login`、`/register`；`beforeEach`：无 token 去登录并带 `redirect`；已登录访问登录/注册回首页 |
-| `src/views/login/LoginView.vue` | 登录表单，成功后按 `redirect` 回跳 |
-| `src/views/login/RegisterView.vue` | 注册表单，校验与 `RegisterRequestDTO` 对齐，成功后自动登录 |
+| `src/views/login/LoginView.vue` | 登录表单。用户名框回车聚焦密码框。校验和登录失败显示在对应输入框下方，输入框边框变红。成功后按 `redirect` 回跳 |
+| `src/views/login/RegisterView.vue` | 注册表单，校验与 `RegisterRequestDTO` 对齐。错误显示在对应输入框下方。接口失败显示在用户名下。成功后自动登录 |
 | `src/views/HomeView.vue` | 展示昵称、用户名、角色；刷新且无 `userInfo` 时调用 `fetchMe`；登出后回 `/login` |
 
-人工验收（注册 → 登录 → 首页 → 刷新仍显示用户 → 登出后再进首页被拦住）尚未在浏览器走完。
+阶段 5 人工验收已通过。登录响应里还没有 `refreshToken` 时，前端不会发起刷新。
 
 ---
 
@@ -172,8 +175,8 @@ API 统一前缀：`/ghost/**`（前后端一致，由 `${api}` 配置注入）�
 | 2 | MySQL + MyBatis-Plus + `user` 表 | 已完成（含建表 SQL `data_table/schema/user.sql`） |
 | 3 | JWT 鉴权：注册 / 登录 / `/me` | 已完成（含 CORS 放行 `localhost:5173`） |
 | 4 | 前端 Vite 壳 + axios 代理 | 已完成（依赖、代理、目录骨架均就绪） |
-| 5 | 前端登录页 + 路由守卫 + 联调 | 代码已落地；全链路人工验收未完成 |
-| 6 | 登出与刷新 Token、权限注解、测试、日志、Flyway | 未开始 |
+| 5 | 前端登录页 + 路由守卫 + 联调 | 已完成（2026-10-24 人工验收通过） |
+| 6 | 登出与刷新 Token、权限注解、测试、日志、Flyway | 进行中。登出接口已有；刷新 Token、权限、测试、日志、Flyway 未做 |
 
 ---
 
@@ -204,16 +207,12 @@ API 统一前缀：`/ghost/**`（前后端一致，由 `${api}` 配置注入）�
 
 ## 下一步（建议顺序）
 
-### 1. 收尾阶段 5 验收
-
-在 5173 与 8080 都已启动时走一遍：注册 → 登录进首页并能看到昵称 → 刷新后仍显示同一用户 → 登出后再打开 `/` 被拦到登录页。通过后再进入阶段 6。
-
-### 2. 阶段 6：鉴权补齐与可重复构建
+### 1. 阶段 6：鉴权补齐与可重复构建
 
 做到下面这些即算本阶段完成：
 
-1. **登出**：`POST /ghost/auth/logout`。当前 JWT 无状态，接口只需校验已登录并返回成功；前端 `logout` 先调该接口，无论成败都清本地 token 并回 `/login`。
-2. **刷新 Token**：登录响应增加 `refreshToken`（有效期长于 12 小时的 access token）。`POST /ghost/auth/refresh` 用 refresh token 换新的 access token。axios 在 access token 过期（401）时尝试刷新一次，失败再清 token 跳登录。refresh token 与 access token 一样不入库明文日志。
+1. **登出**：已完成。`POST /ghost/auth/logout` 校验已登录并返回成功。前端先调该接口，无论成败都清本地 token 并回 `/login`。JWT 过期前仍然有效。
+2. **刷新 Token**：登录响应增加 `refreshToken`（有效期长于 12 小时的 access token）。`POST /ghost/auth/refresh` 用 refresh token 换新的 access token。前端已在 401 时刷新一次。refresh token 与 access token 一样不入库明文日志。
 3. **权限注解**：开启方法安全。`/me` 要求已认证；预留一个仅 `ADMIN` 可访问的示例接口（或在现有用户接口上按 `UserRole` 限制），未授权返回统一 `Response`，前端不必做管理页。
 4. **测试**：`UserService` 注册（重复用户名失败）、登录（密码错误失败、成功签发 token）有测试覆盖。可用测试库或 mock Mapper，不依赖本机 `application-local.yml` 里的密码。
 5. **日志**：登录成功与失败打业务日志，不打印密码和完整 token。
@@ -221,7 +220,7 @@ API 统一前缀：`/ghost/**`（前后端一致，由 `${api}` 配置注入）�
 
 **验收：** 登录后等到 access token 失效仍能通过 refresh 继续调用 `/me`；登出后旧 access token 访问 `/me` 失败（若尚未做服务端吊销，则以前端清 token、再请求不再带 Authorization 为准，并在代码注释里写明 JWT 在过期前仍然有效）；非管理员访问管理员示例接口得到统一错误体；`mvn test` 通过。
 
-### 3. 仓库补齐（可与阶段 6 并行）
+### 2. 仓库补齐（可与阶段 6 并行）
 
 - 根目录 `README.md` 已有启动说明
 - 把 `mvnw` / `mvnw.cmd` / `.mvn/` / `.gitattributes` 加入版本控制
@@ -247,8 +246,8 @@ API 统一前缀：`/ghost/**`（前后端一致，由 `${api}` 配置注入）�
 - 修改代码时**不改动无关文件**；保持现有包名 `com.ghost.frame` 与按层分包结构。
 - 密钥、数据库密码不进仓库；本地配置用 `application-local.yml` 或环境变量。
 - 问答与请求权限用中文；代码注释保持简洁，仅解释非显而易见的逻辑。
-- 当前最优先任务：人工走完阶段 5 验收，然后做**阶段 6**（登出、刷新 Token、`@PreAuthorize`、`UserService` 测试、登录日志、Flyway）。阶段 6 的后端部分仍由用户手写。
-- 进度基线核对时间：2026-10-24。阶段 5 的页面、store、拦截器和路由守卫已在工作区，尚未提交。
+- 当前最优先任务：**阶段 6 后端剩余项**（刷新 Token、`@PreAuthorize`、`UserService` 测试、登录日志、Flyway），由用户手写。登出接口已落地。前端在响应没有 `refreshToken` 时不会尝试刷新。
+- 进度基线核对时间：2026-10-24。阶段 5 已验收。登录、注册的字段错误提示已与输入框对齐。
 
 ---
 

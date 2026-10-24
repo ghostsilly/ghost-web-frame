@@ -94,6 +94,17 @@ a {
   border-color: var(--accent);
 }
 
+.field input.input-invalid {
+  border-color: #d92d20;
+}
+
+.field-error {
+  margin: 6px 0 0;
+  font-size: 12px;
+  line-height: 1.4;
+  color: #d92d20;
+}
+
 .btn-primary {
   width: 100%;
   padding: 10px;
@@ -115,7 +126,7 @@ a {
 }
 
 .auth-error {
-  margin-bottom: 16px;
+  margin: 8px 0 0;
   padding: 8px 12px;
   font-size: 14px;
   color: #b42318;

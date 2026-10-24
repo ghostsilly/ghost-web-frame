@@ -41,6 +41,12 @@ public class LoginRegisterController extends BaseController{
   public Response<LoginRequestVO> obtainTheCurrentUser() {
     Long userId = getUserId();
     return Response.success(userService.obtainTheCurrentUser(userId));
+  } 
+  
+  @PostMapping("/logout")
+  public Response<String> logout() {
+    getUserId();
+    return Response.success();
   }
   
 }
