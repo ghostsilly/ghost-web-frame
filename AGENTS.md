@@ -82,7 +82,7 @@ ghost-web-frame/
 
 **已删除（Vite 默认模板）：** `src/components/HelloWorld.vue`、`src/assets/{hero.png, vite.svg, vue.svg}`。
 
-**尚未创建：** 根目录 `README.md`。token 存在 `localStorage`（键 `ghost-token`），不需要单独的 `src/utils/`。
+根目录已有 `README.md`。token 存在 `localStorage`（键 `ghost-token`），不需要单独的 `src/utils/`。
 
 ---
 
@@ -223,7 +223,7 @@ API 统一前缀：`/ghost/**`（前后端一致，由 `${api}` 配置注入）�
 
 ### 3. 仓库补齐（可与阶段 6 并行）
 
-- 添加根目录 `README.md`（JDK 17、Maven、Node、MySQL 版本与启动步骤）
+- 根目录 `README.md` 已有启动说明
 - 把 `mvnw` / `mvnw.cmd` / `.mvn/` / `.gitattributes` 加入版本控制
 
 ---
@@ -242,11 +242,12 @@ API 统一前缀：`/ghost/**`（前后端一致，由 `${api}` 配置注入）�
 
 ## 给 AI Agent 的协作约定
 
-- 用户倾向**手动开发**；默认只提供步骤与示例，不批量生成代码，除非明确要求。
+- **后端由用户手动开发。** 对 `ghost-frame-backend/` 只给步骤、接口约定和示例片段，不直接改 Java、XML、SQL 或 `pom.xml`，除非用户在当次对话里明确要求改某个后端文件。
+- **前端可以由 AI 写。** 可以改 `ghost-frame-frontend/`。每次交付生成或修改过的前端代码时，用中文说明每个改动文件的作用，以及关键函数、请求和路由各自做什么。
 - 修改代码时**不改动无关文件**；保持现有包名 `com.ghost.frame` 与按层分包结构。
 - 密钥、数据库密码不进仓库；本地配置用 `application-local.yml` 或环境变量。
 - 问答与请求权限用中文；代码注释保持简洁，仅解释非显而易见的逻辑。
-- 当前最优先任务：人工走完阶段 5 验收，然后做**阶段 6**（登出、刷新 Token、`@PreAuthorize`、`UserService` 测试、登录日志、Flyway）。
+- 当前最优先任务：人工走完阶段 5 验收，然后做**阶段 6**（登出、刷新 Token、`@PreAuthorize`、`UserService` 测试、登录日志、Flyway）。阶段 6 的后端部分仍由用户手写。
 - 进度基线核对时间：2026-10-24。阶段 5 的页面、store、拦截器和路由守卫已在工作区，尚未提交。
 
 ---
