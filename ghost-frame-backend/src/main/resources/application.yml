@@ -35,7 +35,7 @@ mybatis-plus:
 # JWT 配置
 jwt:
   secret: ${jwt.jwt-secret}
-  expiration-ms: 10000   #  半天
+  expiration-ms: 21600000   #  半天
   refresh-expiration-ms: 604800000
 
 # API 统一前缀
