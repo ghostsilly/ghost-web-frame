@@ -30,10 +30,29 @@ function handleUnauthorized() {
 }
 
 function canTryRefresh(config) {
-    return !config?.skipAuthRedirect
-        && !config?.skipRefresh
+    return !config?.skipRefresh
         && !config?._retry
         && !!localStorage.getItem(REFRESH_TOKEN_KEY)
+}
+
+/** access token 的 exp（秒）。解析失败返回 null，交给服务端判断。 */
+export function readAccessExp(token) {
+    const payload = token?.split('.')[1]
+    if (!payload) {
+        return null
+    }
+    try {
+        const json = atob(payload.replace(/-/g, '+').replace(/_/g, '/'))
+        const exp = JSON.parse(json).exp
+        return typeof exp === 'number' ? exp : null
+    } catch {
+        return null
+    }
+}
+
+export function isAccessTokenExpired(token = localStorage.getItem(TOKEN_KEY)) {
+    const exp = readAccessExp(token)
+    return exp != null && exp * 1000 <= Date.now()
 }
 
 function refreshAccessToken() {
@@ -72,18 +91,31 @@ function refreshAndRetry(config) {
         config.headers.Authorization = `Bearer ${token}`
         return service(config)
     }).catch((error) => {
-        handleUnauthorized()
+        if (!config?.skipAuthRedirect) {
+            handleUnauthorized()
+        }
         return Promise.reject(error)
     })
 }
 // ==============请求拦截器：自动带上token==============
 service.interceptors.request.use(
-    (config) => {
-        if (!config.skipAuth) {
-            const token = localStorage.getItem(TOKEN_KEY)
-            if (token) {
-                config.headers.Authorization = `Bearer ${token}`
+    async (config) => {
+        if (config.skipAuth) {
+            return config
+        }
+        let token = localStorage.getItem(TOKEN_KEY)
+        if (token && isAccessTokenExpired(token) && canTryRefresh(config)) {
+            try {
+                token = await refreshAccessToken()
+            } catch (error) {
+                if (!config.skipAuthRedirect) {
+                    handleUnauthorized()
+                }
+                return Promise.reject(error)
             }
+        }
+        if (token) {
+            config.headers.Authorization = `Bearer ${token}`
         }
         return config
     },

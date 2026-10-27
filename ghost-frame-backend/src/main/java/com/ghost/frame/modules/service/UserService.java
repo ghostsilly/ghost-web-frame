@@ -1,6 +1,7 @@
 package com.ghost.frame.modules.service;
 
 import com.ghost.frame.modules.dto.LoginRequestDTO;
+import com.ghost.frame.modules.dto.RefreshRequestDTO;
 import com.ghost.frame.modules.dto.RegisterRequestDTO;
 import com.ghost.frame.modules.entity.User;
 import com.baomidou.mybatisplus.extension.service.IService;
@@ -19,4 +20,6 @@ public interface UserService extends IService<User> {
   LoginRequestVO register(@Valid RegisterRequestDTO registerRequestDTO);
 
   LoginRequestVO obtainTheCurrentUser(Long userId);
+  
+  LoginRequestVO refresh(@Valid RefreshRequestDTO refreshRequestDTO);
 }

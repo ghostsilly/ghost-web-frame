@@ -2,6 +2,7 @@ package com.ghost.frame.modules.controller;
 
 import com.ghost.frame.common.Response;
 import com.ghost.frame.modules.dto.LoginRequestDTO;
+import com.ghost.frame.modules.dto.RefreshRequestDTO;
 import com.ghost.frame.modules.dto.RegisterRequestDTO;
 import com.ghost.frame.modules.service.UserService;
 import com.ghost.frame.modules.vo.LoginRequestVO;
@@ -43,10 +44,17 @@ public class LoginRegisterController extends BaseController{
     return Response.success(userService.obtainTheCurrentUser(userId));
   } 
   
+  @Operation(summary = "用户登出")
   @PostMapping("/logout")
   public Response<String> logout() {
     getUserId();
     return Response.success();
+  }
+  
+  @Operation(summary = "用户刷新")
+  @PostMapping("/refresh")
+  public Response<LoginRequestVO> refresh(@Valid @RequestBody RefreshRequestDTO refreshRequestDTO){
+    return Response.success(userService.refresh(refreshRequestDTO));
   }
   
 }

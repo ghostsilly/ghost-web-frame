@@ -2,6 +2,7 @@
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '../stores/user'
+import { isAccessTokenExpired, readAccessExp, TOKEN_KEY } from '../api/request'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -16,10 +17,7 @@ const ROLE_LABEL = {
 
 const roleText = computed(() => ROLE_LABEL[userStore.userInfo?.role] ?? '未知角色')
 
-onMounted(async () => {
-  if (!userStore.isLoggedIn || userStore.userInfo) {
-    return
-  }
+async function loadMe() {
   loading.value = true
   try {
     await userStore.fetchMe()
@@ -29,6 +27,26 @@ onMounted(async () => {
   } finally {
     loading.value = false
   }
+}
+
+onMounted(() => {
+  if (!userStore.isLoggedIn) {
+    return
+  }
+  const needMe = !userStore.userInfo || isAccessTokenExpired()
+  if (needMe) {
+    loadMe()
+  }
+  const exp = readAccessExp(localStorage.getItem(TOKEN_KEY))
+  if (exp == null) {
+    return
+  }
+  const delay = exp * 1000 - Date.now() + 500
+  window.setTimeout(() => {
+    if (userStore.isLoggedIn) {
+      loadMe()
+    }
+  }, Math.max(delay, 0))
 })
 
 async function handleLogout() {

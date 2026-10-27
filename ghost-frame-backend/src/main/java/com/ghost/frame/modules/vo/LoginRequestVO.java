@@ -23,4 +23,6 @@ public class LoginRequestVO {
   private UserRole role;
   //  token令牌
   private String token;
+  //  刷新令牌
+  private String refreshToken;
 }

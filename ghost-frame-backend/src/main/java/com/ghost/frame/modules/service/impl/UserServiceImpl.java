@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ghost.frame.common.enums.ErrorCode;
 import com.ghost.frame.common.exception.BusinessException;
 import com.ghost.frame.modules.dto.LoginRequestDTO;
+import com.ghost.frame.modules.dto.RefreshRequestDTO;
 import com.ghost.frame.modules.dto.RegisterRequestDTO;
 import com.ghost.frame.modules.entity.User;
 import com.ghost.frame.modules.enums.DeleteFlag;
@@ -52,7 +53,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         user.getNickname(), 
         user.getUsername(), 
         user.getRole(), 
-        jwtUtil.generateToken(user.getId(), user.getUsername())
+        jwtUtil.generateAccessToken(user.getId(), user.getUsername()),
+        jwtUtil.generateRefreshToken(user.getId(), user.getUsername())
     );
   }
 
@@ -92,7 +94,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
           user.getNickname(),
           user.getUsername(),
           user.getRole(),
-          jwtUtil.generateToken(user.getId(), user.getUsername())
+          jwtUtil.generateAccessToken(user.getId(), user.getUsername()),
+          jwtUtil.generateRefreshToken(user.getId(), user.getUsername())
       );
     }
     
@@ -110,13 +113,40 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         user.getNickname(),
         user.getUsername(),
         user.getRole(),
-        jwtUtil.generateToken(user.getId(), user.getUsername())
+        jwtUtil.generateAccessToken(user.getId(), user.getUsername()),
+        jwtUtil.generateRefreshToken(user.getId(), user.getUsername())
     );
   }
 
   @Override
   public LoginRequestVO obtainTheCurrentUser(Long userId) {
     return userMapper.getUserInformation(userId);
+  }
+
+  @Override
+  public LoginRequestVO refresh(RefreshRequestDTO refreshRequestDTO) {
+    if (!jwtUtil.isRefreshToken(refreshRequestDTO.getRefreshToken())){
+      throw new BusinessException(ErrorCode.UNAUTHORIZED);
+    }
+    Long userId = jwtUtil.getUserId(refreshRequestDTO.getRefreshToken());
+    User user = userMapper.selectOne(new LambdaQueryWrapper<User>()
+        .eq(User::getId, userId)
+        .eq(User::getDeleted, DeleteFlag.NOT_DELETED)
+    );
+    if (ObjectUtil.isEmpty(user)){
+      throw new BusinessException(ErrorCode.USER_NOT_FOUND);
+    }
+    if (user.getStatus().equals(UserStatus.LOCKED)){
+      throw new BusinessException(ErrorCode.USER_DISABLED);
+    }
+    return new LoginRequestVO(
+        user.getId(),
+        user.getNickname(),
+        user.getUsername(),
+        user.getRole(),
+        jwtUtil.generateAccessToken(user.getId(), user.getUsername()),
+        refreshRequestDTO.getRefreshToken()
+    );
   }
 }
 

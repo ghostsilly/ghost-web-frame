@@ -55,7 +55,7 @@ export const useUserStore = defineStore('user', () => {
     }
 
     async function fetchMe() {
-        //skipAuthRedirect: true 表示不跳转到登录页，直接抛出错误
+        // skipAuthRedirect 只禁止跳登录页，access token 过期时仍会先走 /refresh
         const data = await getMe({ skipAuthRedirect: true })
         // /me 的 resultMap 不返回 token，只能合并、不能整体覆盖
         userInfo.value = { ...userInfo.value, ...data }

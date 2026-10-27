@@ -1,6 +1,6 @@
 # 服务端口
 server:
-  port: 8080
+  port: 10583
 # 服务名称
 spring:
   application:
@@ -35,7 +35,8 @@ mybatis-plus:
 # JWT 配置
 jwt:
   secret: ${jwt.jwt-secret}
-  expiration-ms: 43200000   #  半天
+  expiration-ms: 10000   #  半天
+  refresh-expiration-ms: 604800000
 
 # API 统一前缀
 api: /ghost

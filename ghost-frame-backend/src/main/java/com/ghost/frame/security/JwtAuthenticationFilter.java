@@ -38,7 +38,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     ) throws ServletException, IOException {
         // 从请求头中解析 token
         String token = resolveToken(request);
-        if (StringUtils.hasText(token) && jwtUtil.isValid(token)
+        if (StringUtils.hasText(token) && jwtUtil.isAccessToken(token)
                 && SecurityContextHolder.getContext().getAuthentication() == null) {
             Long userId = jwtUtil.getUserId(token);
             // principal 放 userId，后面 /me、自动填充都能用
