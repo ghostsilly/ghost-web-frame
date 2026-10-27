@@ -1,11 +1,15 @@
 
 package com.ghost.frame.common;
 
-import com.ghost.frame.common.enums.ErrorCode;
+import com.ghost.frame.common.throwable.enums.ErrorCode;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * 响应结果封装类
+ * @author 34592
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

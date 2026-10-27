@@ -11,7 +11,7 @@
 | 后端 | Java 17 + Spring Boot 3.5.16 + Maven | 已接入 Web / Validation / Security |
 | 前端 | Vue 3 + Vite | 登录 / 注册 / 首页、axios、Pinia、路由守卫已落地 |
 | 数据库 | MySQL + MyBatis-Plus 3.5.9 | 已接入，实体与 Mapper 已写，建表 SQL 已落地 |
-| 鉴权 | JWT（jjwt 0.12.6）+ Spring Security | 已接入过滤器与配置 |
+| 鉴权 | JWT（jjwt 0.12.6）+ Spring Security | 已接入过滤器与登录态；接口只区分是否已登录 |
 | 接口文档 | knife4j 4.5.0 + springdoc-openapi 2.7.0 | 已接入 |
 | 工具库 | Hutool 5.8.47、Lombok | 已引入 |
 | 容器化 | 无 | 按约定不加 Docker |
@@ -36,16 +36,17 @@ ghost-web-frame/
 │       │   │   ├── GhostFrameBackendApplication.java
 │       │   │   ├── common/
 │       │   │   │   ├── Response.java                 # 统一响应体
-│       │   │   │   ├── GlobalExceptionHandler.java
 │       │   │   │   ├── MyMetaObjectHandler.java      # 自动填充 create/update 字段
-│       │   │   │   ├── enums/ErrorCode.java
-│       │   │   │   └── exception/BusinessException.java
+│       │   │   │   └── throwable/
+│       │   │   │       ├── GlobalExceptionHandler.java
+│       │   │   │       ├── enums/ErrorCode.java
+│       │   │   │       └── exception/BusinessException.java
 │       │   │   ├── config/
 │       │   │   │   └── OpenApiConfig.java            # knife4j / springdoc
 │       │   │   ├── security/
 │       │   │   │   ├── SecurityConfig.java           # 过滤链 + CORS
-│       │   │   │   ├── JwtAuthenticationFilter.java
-│       │   │   │   └── JwtUtil.java
+│       │   │   │   ├── JwtAuthenticationFilter.java  # 只接受 access token
+│       │   │   │   └── JwtUtil.java                  # access / refresh，用 tokenType 区分
 │       │   │   └── modules/                          # 按层分包（见下方说明）
 │       │   │       ├── controller/
 │       │   │       │   ├── BaseController.java       # getUserId() 取当前登录用户
@@ -93,9 +94,10 @@ ghost-web-frame/
 
 ```text
 com.ghost.frame
-├── common/          # Response、GlobalExceptionHandler、BusinessException、ErrorCode、MyMetaObjectHandler
-│   ├── enums/       # ErrorCode
-│   └── exception/   # BusinessException
+├── common/          # Response、MyMetaObjectHandler、全局异常
+│   └── throwable/   # GlobalExceptionHandler
+│       ├── enums/      # ErrorCode
+│       └── exception/  # BusinessException
 ├── config/         # OpenApiConfig（后续放 WebMvc、Jackson）
 ├── security/       # SecurityFilterChain（含 CORS）、JwtAuthenticationFilter、JwtUtil
 └── modules/
@@ -131,13 +133,14 @@ API 统一前缀：`/ghost/**`（前后端一致，由 `${api}` 配置注入）�
 - knife4j 接口文档（已强制覆盖 springdoc 到 2.7.0 兼容 Spring Framework 6.2.x）
 - 建表 SQL 已落地：`data_table/schema/user.sql`
 - `application-local.yml` 已落地，`application.yml` 通过 `${mysql.username}` / `${mysql.password}` / `${jwt.jwt-secret}` 注入敏感值
+- 未登录访问受保护接口走 `SecurityConfig.authenticationEntryPoint`，返回 401 统一体
 
 ### 尚未实现
 
-- 权限注解（`@PreAuthorize`）与管理员示例接口
 - 登录成功 / 失败业务日志
 - 单元测试 / 集成测试（只有默认上下文加载测试）
 - Flyway
+- 接口权限角色，以及可动态修改的接口权限归属。`UserRole` 只区分账号类型，不参与接口鉴权
 
 ---
 
@@ -179,7 +182,7 @@ API 统一前缀：`/ghost/**`（前后端一致，由 `${api}` 配置注入）�
 | 3 | JWT 鉴权：注册 / 登录 / `/me` | 已完成（含 CORS 放行 `localhost:5173`） |
 | 4 | 前端 Vite 壳 + axios 代理 | 已完成（依赖、代理、目录骨架均就绪） |
 | 5 | 前端登录页 + 路由守卫 + 联调 | 已完成（2026-10-24 人工验收通过） |
-| 6 | 登出与刷新 Token、权限注解、测试、日志、Flyway | 进行中。登出与刷新 Token 已落地；权限注解、测试、日志、Flyway 未做 |
+| 6 | 登出与刷新 Token、测试、日志、Flyway | 进行中（2026-10-27）。登出、刷新 Token 已落地。按账号角色做的方法级权限已移除。测试、日志、Flyway 未做 |
 
 ---
 
@@ -192,6 +195,10 @@ API 统一前缀：`/ghost/**`（前后端一致，由 `${api}` 配置注入）�
 5. **阶段 5 代码仍在工作区**（截至 2026-10-24）：前端业务文件已有实现，但尚未作为一次提交入库。`mvnw` / `mvnw.cmd` / `.mvn/` 以及根目录、后端的 `.gitattributes` 仍未 `git add`。不要把 `application-local.yml` 提交进去。
 6. **`.idea/` 已被忽略**：根 `.gitignore` 第 11 行 `.idea/` 同时覆盖了 `ghost-frame-backend/.idea/`，`git ls-files` 无 IDE 配置污染，无需处理。
 7. **前端可以打开页面**：`npm run dev` 默认端口 5173。未登录访问 `/` 会到 `/login?redirect=/`。后端需在 8080 启动，否则登录、注册、`fetchMe` 会失败。
+8. **`UserRole` 只区分账号类型**，不参与接口鉴权。现有接口只区分未登录和已登录。不要再用 `@PreAuthorize` 或 `hasRole` 把 `USER` / `ADMIN` / `SUPER_ADMIN` 绑到接口上。
+9. **接口权限以后单独做**：新增一套权限角色，用来决定能不能调用接口，并支持在系统里动态修改接口归属。账号角色和权限角色分开。
+10. **`@RequestMapping` 不要在 `${api}` 前再加斜杠**：`${api}` 已是 `/ghost`，写成 `/ ${api}` 会拼出双斜杠。正确写法是 `@RequestMapping("${api}/auth")`。
+11. **公开注册固定为 `UserRole.USER`**。`RegisterRequestDTO` 里不要加 `role`，避免调用方自己指定账号类型。
 
 ---
 
@@ -216,17 +223,20 @@ API 统一前缀：`/ghost/**`（前后端一致，由 `${api}` 配置注入）�
 
 1. **登出**：已完成。`POST /ghost/auth/logout` 校验已登录并返回成功。前端先调该接口，无论成败都清本地 token 并回 `/login`。JWT 过期前仍然有效。
 2. **刷新 Token**：已完成。登录和注册返回 `token` 与 `refreshToken`。`POST /ghost/auth/refresh` 放行，用 refresh token 换新的 access token。前端在 access token 过期或 401 时先刷新再重放。refresh token 不入库、不打进明文日志。尚未做服务端吊销。
-3. **权限注解**：开启方法安全。`/me` 要求已认证；预留一个仅 `ADMIN` 可访问的示例接口（或在现有用户接口上按 `UserRole` 限制），未授权返回统一 `Response`，前端不必做管理页。
-4. **测试**：`UserService` 注册（重复用户名失败）、登录（密码错误失败、成功签发 token）有测试覆盖。可用测试库或 mock Mapper，不依赖本机 `application-local.yml` 里的密码。
-5. **日志**：登录成功与失败打业务日志，不打印密码和完整 token。
-6. **Flyway**：用 Flyway 执行 `data_table/schema/user.sql` 的等价迁移，新环境启动即可建表。全量脚本规范不变：之后改表仍要同步 `schema/` 与 `migration/`。
+3. **测试**：`UserService` 注册（重复用户名失败）、登录（密码错误失败、成功签发 token）有测试覆盖。可用测试库或 mock Mapper，不依赖本机 `application-local.yml` 里的密码。
+4. **日志**：登录成功与失败打业务日志，不打印密码和完整 token。
+5. **Flyway**：用 Flyway 执行 `data_table/schema/user.sql` 的等价迁移，新环境启动即可建表。全量脚本规范不变：之后改表仍要同步 `schema/` 与 `migration/`。
 
-**验收：** 登录后等到 access token 失效仍能通过 refresh 继续调用 `/me`；登出后旧 access token 访问 `/me` 失败（若尚未做服务端吊销，则以前端清 token、再请求不再带 Authorization 为准，并在代码注释里写明 JWT 在过期前仍然有效）；非管理员访问管理员示例接口得到统一错误体；`mvn test` 通过。
+**验收：** 登录后等到 access token 失效仍能通过 refresh 继续调用 `/me`；登出后旧 access token 访问 `/me` 失败（若尚未做服务端吊销，则以前端清 token、再请求不再带 Authorization 为准，并在代码注释里写明 JWT 在过期前仍然有效）；`mvn test` 通过。
 
 ### 2. 仓库补齐（可与阶段 6 并行）
 
 - 根目录 `README.md` 已有启动说明
 - 把 `mvnw` / `mvnw.cmd` / `.mvn/` / `.gitattributes` 加入版本控制
+
+### 3. 接口权限（后续，不在阶段 6）
+
+`UserRole` 只表示账号类型。接口能不能访问，以后用另一套权限角色，并允许在系统里修改接口归属。在那套能力落地前，新接口沿用现在的规则：公开接口 `permitAll`，其余接口要求已登录。
 
 ---
 
@@ -249,8 +259,8 @@ API 统一前缀：`/ghost/**`（前后端一致，由 `${api}` 配置注入）�
 - 修改代码时**不改动无关文件**；保持现有包名 `com.ghost.frame` 与按层分包结构。
 - 密钥、数据库密码不进仓库；本地配置用 `application-local.yml` 或环境变量。
 - 问答与请求权限用中文；代码注释保持简洁，仅解释非显而易见的逻辑。
-- 当前最优先任务：**阶段 6 后端剩余项**（`@PreAuthorize`、`UserService` 测试、登录日志、Flyway），由用户手写。登出和刷新 Token 已落地。
-- 进度基线核对时间：2026-10-27。阶段 5 已验收。刷新 Token 前后端已接通。注册页字段顺序为昵称、用户名。登录和注册的密码框使用眼睛图标显隐。
+- 当前最优先任务：**阶段 6 后端剩余项**（`UserService` 测试、登录日志、Flyway），由用户手写。登出和刷新 Token 已落地。不要把 `UserRole` 写成接口权限。
+- 进度基线核对时间：2026-10-27。阶段 5 已验收。刷新 Token 前后端已接通。按账号角色做的方法级权限已移除。注册页字段顺序为昵称、用户名。登录和注册的密码框使用眼睛图标显隐。
 
 ---
 

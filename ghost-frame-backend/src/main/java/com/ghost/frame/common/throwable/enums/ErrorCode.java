@@ -1,5 +1,13 @@
-package com.ghost.frame.common.enums;
+package com.ghost.frame.common.throwable.enums;
 
+import lombok.Getter;
+
+/**
+ * 错误码枚举类
+ * @author 34592
+ */
+
+@Getter
 public enum ErrorCode {
     // 200-成功
     SUCCESS(200, "成功"),
@@ -28,11 +36,4 @@ public enum ErrorCode {
         this.message = message;
     }
 
-    public Integer getCode() {
-        return code;
-    }
-
-    public String getMessage() {
-        return message;
-    }
 }

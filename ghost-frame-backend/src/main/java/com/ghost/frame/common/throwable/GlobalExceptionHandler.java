@@ -1,7 +1,8 @@
 
-package com.ghost.frame.common;
+package com.ghost.frame.common.throwable;
 
-import com.ghost.frame.common.exception.BusinessException;
+import com.ghost.frame.common.Response;
+import com.ghost.frame.common.throwable.exception.BusinessException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 /**
  * 全局异常处理
+ * @author 34592
  */
 @RestControllerAdvice
 @Slf4j
@@ -34,7 +36,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public Response<?> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
         log.error("参数校验异常: ", e);
-        return Response.error(e.getBindingResult().getFieldError().getDefaultMessage());
+        return Response.error(e.getMessage());
     }
     
     /**
