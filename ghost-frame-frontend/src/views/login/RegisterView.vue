@@ -2,6 +2,7 @@
 import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '../../stores/user'
+import PasswordInput from '../../components/PasswordInput.vue'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -28,16 +29,16 @@ async function handleSubmit() {
   errorField.value = ''
 
   // 校验规则与后端 RegisterRequestDTO 的注解逐条对齐
+  if (!form.nickname) {
+    setError('nickname', '请输入昵称')
+    return
+  }
   if (!form.username) {
     setError('username', '请输入用户名')
     return
   }
   if (form.username.length < 5 || form.username.length > 20) {
     setError('username', '用户名长度需在 5 到 20 个字符之间')
-    return
-  }
-  if (!form.nickname) {
-    setError('nickname', '请输入昵称')
     return
   }
   if (!form.password) {
@@ -74,19 +75,9 @@ async function handleSubmit() {
 
       <form @submit.prevent="handleSubmit">
         <div class="field">
-          <label for="reg-username">用户名</label>
-          <input id="reg-username" v-model.trim="form.username" type="text" autocomplete="username"
-            placeholder="5–20 个字符"
-            :class="{ 'input-invalid': errorField === 'username' }"
-            :aria-invalid="errorField === 'username'"
-            :aria-describedby="errorField === 'username' ? 'reg-username-error' : undefined" />
-          <p v-if="errorField === 'username'" id="reg-username-error" class="field-error">{{ errorMsg }}</p>
-        </div>
-
-        <div class="field">
           <label for="reg-nickname">昵称</label>
           <input id="reg-nickname" v-model.trim="form.nickname" type="text" autocomplete="nickname"
-            placeholder="用于展示的昵称"
+            placeholder="请输入用户昵称"
             :class="{ 'input-invalid': errorField === 'nickname' }"
             :aria-invalid="errorField === 'nickname'"
             :aria-describedby="errorField === 'nickname' ? 'reg-nickname-error' : undefined" />
@@ -94,22 +85,28 @@ async function handleSubmit() {
         </div>
 
         <div class="field">
+          <label for="reg-username">用户名</label>
+          <input id="reg-username" v-model.trim="form.username" type="text" autocomplete="username"
+            placeholder="请输入用户名"
+            :class="{ 'input-invalid': errorField === 'username' }"
+            :aria-invalid="errorField === 'username'"
+            :aria-describedby="errorField === 'username' ? 'reg-username-error' : undefined" />
+          <p v-if="errorField === 'username'" id="reg-username-error" class="field-error">{{ errorMsg }}</p>
+        </div>
+
+        <div class="field">
           <label for="reg-password">密码</label>
-          <input id="reg-password" v-model="form.password" type="password" autocomplete="new-password"
-            placeholder="请输入密码"
-            :class="{ 'input-invalid': errorField === 'password' }"
-            :aria-invalid="errorField === 'password'"
-            :aria-describedby="errorField === 'password' ? 'reg-password-error' : undefined" />
+          <PasswordInput id="reg-password" v-model="form.password" autocomplete="new-password"
+            placeholder="请输入密码" :invalid="errorField === 'password'"
+            :described-by="errorField === 'password' ? 'reg-password-error' : undefined" />
           <p v-if="errorField === 'password'" id="reg-password-error" class="field-error">{{ errorMsg }}</p>
         </div>
 
         <div class="field">
           <label for="reg-confirm">确认密码</label>
-          <input id="reg-confirm" v-model="form.confirmPassword" type="password" autocomplete="new-password"
-            placeholder="请再次输入密码"
-            :class="{ 'input-invalid': errorField === 'confirm' }"
-            :aria-invalid="errorField === 'confirm'"
-            :aria-describedby="errorField === 'confirm' ? 'reg-confirm-error' : undefined" />
+          <PasswordInput id="reg-confirm" v-model="form.confirmPassword" autocomplete="new-password"
+            placeholder="请再次输入密码" :invalid="errorField === 'confirm'"
+            :described-by="errorField === 'confirm' ? 'reg-confirm-error' : undefined" />
           <p v-if="errorField === 'confirm'" id="reg-confirm-error" class="field-error">{{ errorMsg }}</p>
         </div>
 

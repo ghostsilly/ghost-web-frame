@@ -49,12 +49,12 @@ ghost-web-frame/
 │       │   │   └── modules/                          # 按层分包（见下方说明）
 │       │   │       ├── controller/
 │       │   │       │   ├── BaseController.java       # getUserId() 取当前登录用户
-│       │   │       │   └── LoginRegisterController.java  # /ghost/auth/login、/register、/me、/logout
+│       │   │       │   └── LoginRegisterController.java  # /ghost/auth/login、/register、/me、/logout、/refresh
 │       │   │       ├── service/ (+ impl/)            # UserService / UserServiceImpl
 │       │   │       ├── entity/                      # User、BaseEntity
 │       │   │       ├── mapper/                       # UserMapper
-│       │   │       ├── dto/                          # LoginRequestDTO、RegisterRequestDTO
-│       │   │       ├── vo/                           # LoginRequestVO
+│       │   │       ├── dto/                          # LoginRequestDTO、RegisterRequestDTO、RefreshRequestDTO
+│       │   │       ├── vo/                           # LoginRequestVO（含 token、refreshToken）
 │       │   │       └── enums/                      # UserRole、UserStatus、DeleteFlag
 │       │   └── resources/
 │       │       ├── application.yml                 # 默认配置，profile=local，含 api: /ghost
@@ -72,11 +72,12 @@ ghost-web-frame/
         ├── main.js                                   # 已 use(pinia)、use(router)
         ├── App.vue                                   # <router-view />
         ├── style.css
-        ├── api/request.js                            # axios + Bearer + 解包 Response + 401 时尝试 refresh
+        ├── api/request.js                            # axios + Bearer + 解包 Response；access 过期或 401 时刷新
         ├── api/auth.js                               # login / register / getMe / logout
+        ├── components/PasswordInput.vue              # 密码框与眼睛图标显隐
         ├── router/index.js                           # / /login /register + beforeEach
         ├── stores/user.js                            # token 持久化、login / register / fetchMe / logout
-        ├── views/HomeView.vue                        # 展示当前用户，刷新时 fetchMe
+        ├── views/HomeView.vue                        # 展示当前用户；无用户信息或 access 过期时 fetchMe
         └── views/login/LoginView.vue、RegisterView.vue
 ```
 
@@ -121,7 +122,9 @@ API 统一前缀：`/ghost/**`（前后端一致，由 `${api}` 配置注入）�
 - MySQL 数据源 + MyBatis-Plus（含逻辑删除 `deleted`、下划线转驼峰、`id-type: auto`）
 - `User` / `BaseEntity` 实体、`UserMapper`、`MyMetaObjectHandler` 自动填充
 - Spring Security 过滤链 + `JwtUtil` + `JwtAuthenticationFilter`（Bearer Token 解析）
-- `POST /ghost/auth/register`、`POST /ghost/auth/login`（BCrypt 密码、返回 JWT）
+- `POST /ghost/auth/register`、`POST /ghost/auth/login`（BCrypt 密码，返回 access token 与 refresh token）
+- `POST /ghost/auth/refresh`（匿名可访问；只接受 `tokenType=refresh` 的票，换新的 access token，原 refresh token 原样返回）
+- `JwtAuthenticationFilter` 只把 `tokenType=access` 的票写入登录态
 - `GET /ghost/auth/me`（当前登录用户，经 `BaseController.getUserId()` 从 `SecurityContextHolder` 取 id）
 - `POST /ghost/auth/logout`（需已登录；JWT 无状态，接口只确认登录并返回成功，不吊销 token）
 - CORS 已配置（`SecurityConfig.corsConfigurationSource` 放行 `http://localhost:5173`）
@@ -131,7 +134,6 @@ API 统一前缀：`/ghost/**`（前后端一致，由 `${api}` 配置注入）�
 
 ### 尚未实现
 
-- 刷新 Token（`refreshToken` 字段与 `POST /ghost/auth/refresh`）
 - 权限注解（`@PreAuthorize`）与管理员示例接口
 - 登录成功 / 失败业务日志
 - 单元测试 / 集成测试（只有默认上下文加载测试）
@@ -154,15 +156,16 @@ API 统一前缀：`/ghost/**`（前后端一致，由 `${api}` 配置注入）�
 | --- | --- |
 | `src/main.js` | `createApp(App).use(pinia).use(router).mount('#app')`，Pinia 在 Router 之前 |
 | `src/App.vue` | 模板为 `<router-view />` |
-| `src/api/request.js` | `baseURL: '/ghost'`；请求带 `Authorization: Bearer`；业务码 200 解包 `data`；本地有 `ghost-refresh-token` 时，401 只刷新一次并重放原请求，否则清 token 跳登录 |
+| `src/api/request.js` | `baseURL: '/ghost'`；请求带 `Authorization: Bearer`；业务码 200 解包 `data`。本地 access token 的 `exp` 已过、或接口返回 401，且存在 `ghost-refresh-token` 时，先调 `POST /auth/refresh` 再重放原请求。`skipAuthRedirect` 只禁止跳登录页 |
 | `src/api/auth.js` | `login` / `register` / `getMe` / `logout` |
 | `src/stores/user.js` | access token 与 refresh token 写入 `localStorage`；`login`、`register` 写入用户信息；`fetchMe` 合并 `/me`；`logout` 先调登出接口，无论成败都清本地 |
 | `src/router/index.js` | `/`、`/login`、`/register`；`beforeEach`：无 token 去登录并带 `redirect`；已登录访问登录/注册回首页 |
-| `src/views/login/LoginView.vue` | 登录表单。用户名框回车聚焦密码框。校验和登录失败显示在对应输入框下方，输入框边框变红。成功后按 `redirect` 回跳 |
-| `src/views/login/RegisterView.vue` | 注册表单，校验与 `RegisterRequestDTO` 对齐。错误显示在对应输入框下方。接口失败显示在用户名下。成功后自动登录 |
-| `src/views/HomeView.vue` | 展示昵称、用户名、角色；刷新且无 `userInfo` 时调用 `fetchMe`；登出后回 `/login` |
+| `src/components/PasswordInput.vue` | 密码输入框。`toggleVisible` 在明文和圆点之间切换，按钮为眼睛图标 |
+| `src/views/login/LoginView.vue` | 登录表单，密码框使用 `PasswordInput`。用户名框回车聚焦密码框。校验和登录失败显示在对应输入框下方。成功后按 `redirect` 回跳 |
+| `src/views/login/RegisterView.vue` | 注册表单。字段顺序为昵称、用户名、密码、确认密码。昵称提示「请输入用户昵称」，用户名提示「请输入用户名」。两个密码框使用 `PasswordInput`。校验与 `RegisterRequestDTO` 对齐。成功后自动登录 |
+| `src/views/HomeView.vue` | 展示昵称、用户名、角色。无 `userInfo` 或 access token 已过期时调用 `fetchMe`；并按 `exp` 定时再拉一次 `/me`，从而触发刷新。登出后回 `/login` |
 
-阶段 5 人工验收已通过。登录响应里还没有 `refreshToken` 时，前端不会发起刷新。
+阶段 5 人工验收已通过。登录和注册响应里的 `refreshToken` 会写入 `ghost-refresh-token`；没有这张票时前端不会发起刷新。
 
 ---
 
@@ -176,7 +179,7 @@ API 统一前缀：`/ghost/**`（前后端一致，由 `${api}` 配置注入）�
 | 3 | JWT 鉴权：注册 / 登录 / `/me` | 已完成（含 CORS 放行 `localhost:5173`） |
 | 4 | 前端 Vite 壳 + axios 代理 | 已完成（依赖、代理、目录骨架均就绪） |
 | 5 | 前端登录页 + 路由守卫 + 联调 | 已完成（2026-10-24 人工验收通过） |
-| 6 | 登出与刷新 Token、权限注解、测试、日志、Flyway | 进行中。登出接口已有；刷新 Token、权限、测试、日志、Flyway 未做 |
+| 6 | 登出与刷新 Token、权限注解、测试、日志、Flyway | 进行中。登出与刷新 Token 已落地；权限注解、测试、日志、Flyway 未做 |
 
 ---
 
@@ -185,7 +188,7 @@ API 统一前缀：`/ghost/**`（前后端一致，由 `${api}` 配置注入）�
 1. **`${api}` 占位符必须解析成功**：`LoginRegisterController` 使用 `@RequestMapping("${api}/auth")`，**API 统一前缀为 `/ghost`**。`application.yml` 与 `application-local.yml` **都已定义** `api: /ghost`；若改动前缀，两处必须同步，否则启动报 `Could not resolve placeholder 'api'` 或前后端不一致。
 2. **`UserMapper.xml` 扫描已配置**：文件在 `resources/com/ghost/frame/modules/mapper/` 下，`application.yml` 已加 `mybatis-plus.mapper-locations: classpath*:com.ghost.frame.modules.mapper/*.xml`，无需再改。
 3. **数据库名实际为 `silly_ghost_frame`**（不是早期建议的 `ghost_frame`）。本机需手动建库 + 建 `user` 表（`data_table/schema/user.sql`），否则注册/登录必失败。
-4. **JWT 有效期 12 小时**（`jwt.expiration-ms: 43200000`），Secret 从环境变量 `jwt.jwt-secret` 注入，不入库。
+4. **access token 有效期 12 小时**（`jwt.expiration-ms: 43200000`），**refresh token 有效期 7 天**（`jwt.refresh-expiration-ms: 604800000`）。Secret 从环境变量 `jwt.jwt-secret` 注入，不入库。两种票用 claim `tokenType` 区分。
 5. **阶段 5 代码仍在工作区**（截至 2026-10-24）：前端业务文件已有实现，但尚未作为一次提交入库。`mvnw` / `mvnw.cmd` / `.mvn/` 以及根目录、后端的 `.gitattributes` 仍未 `git add`。不要把 `application-local.yml` 提交进去。
 6. **`.idea/` 已被忽略**：根 `.gitignore` 第 11 行 `.idea/` 同时覆盖了 `ghost-frame-backend/.idea/`，`git ls-files` 无 IDE 配置污染，无需处理。
 7. **前端可以打开页面**：`npm run dev` 默认端口 5173。未登录访问 `/` 会到 `/login?redirect=/`。后端需在 8080 启动，否则登录、注册、`fetchMe` 会失败。
@@ -212,7 +215,7 @@ API 统一前缀：`/ghost/**`（前后端一致，由 `${api}` 配置注入）�
 做到下面这些即算本阶段完成：
 
 1. **登出**：已完成。`POST /ghost/auth/logout` 校验已登录并返回成功。前端先调该接口，无论成败都清本地 token 并回 `/login`。JWT 过期前仍然有效。
-2. **刷新 Token**：登录响应增加 `refreshToken`（有效期长于 12 小时的 access token）。`POST /ghost/auth/refresh` 用 refresh token 换新的 access token。前端已在 401 时刷新一次。refresh token 与 access token 一样不入库明文日志。
+2. **刷新 Token**：已完成。登录和注册返回 `token` 与 `refreshToken`。`POST /ghost/auth/refresh` 放行，用 refresh token 换新的 access token。前端在 access token 过期或 401 时先刷新再重放。refresh token 不入库、不打进明文日志。尚未做服务端吊销。
 3. **权限注解**：开启方法安全。`/me` 要求已认证；预留一个仅 `ADMIN` 可访问的示例接口（或在现有用户接口上按 `UserRole` 限制），未授权返回统一 `Response`，前端不必做管理页。
 4. **测试**：`UserService` 注册（重复用户名失败）、登录（密码错误失败、成功签发 token）有测试覆盖。可用测试库或 mock Mapper，不依赖本机 `application-local.yml` 里的密码。
 5. **日志**：登录成功与失败打业务日志，不打印密码和完整 token。
@@ -246,8 +249,8 @@ API 统一前缀：`/ghost/**`（前后端一致，由 `${api}` 配置注入）�
 - 修改代码时**不改动无关文件**；保持现有包名 `com.ghost.frame` 与按层分包结构。
 - 密钥、数据库密码不进仓库；本地配置用 `application-local.yml` 或环境变量。
 - 问答与请求权限用中文；代码注释保持简洁，仅解释非显而易见的逻辑。
-- 当前最优先任务：**阶段 6 后端剩余项**（刷新 Token、`@PreAuthorize`、`UserService` 测试、登录日志、Flyway），由用户手写。登出接口已落地。前端在响应没有 `refreshToken` 时不会尝试刷新。
-- 进度基线核对时间：2026-10-24。阶段 5 已验收。登录、注册的字段错误提示已与输入框对齐。
+- 当前最优先任务：**阶段 6 后端剩余项**（`@PreAuthorize`、`UserService` 测试、登录日志、Flyway），由用户手写。登出和刷新 Token 已落地。
+- 进度基线核对时间：2026-10-27。阶段 5 已验收。刷新 Token 前后端已接通。注册页字段顺序为昵称、用户名。登录和注册的密码框使用眼睛图标显隐。
 
 ---
 

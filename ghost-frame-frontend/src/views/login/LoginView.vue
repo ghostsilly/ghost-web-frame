@@ -2,6 +2,7 @@
 import { reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useUserStore } from '../../stores/user'
+import PasswordInput from '../../components/PasswordInput.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -85,11 +86,10 @@ function resolveRedirect() {
 
         <div class="field">
           <label for="password">密码</label>
-          <input id="password" ref="passwordInput" v-model="form.password" type="password" autocomplete="current-password"
-            placeholder="请输入密码"
-            :class="{ 'input-invalid': errorField === 'password' }"
-            :aria-invalid="errorField === 'password'"
-            :aria-describedby="errorField === 'password' ? 'password-error' : undefined" />
+          <PasswordInput id="password" ref="passwordInput" v-model="form.password"
+            autocomplete="current-password" placeholder="请输入密码"
+            :invalid="errorField === 'password'"
+            :described-by="errorField === 'password' ? 'password-error' : undefined" />
           <p v-if="errorField === 'password'" id="password-error" class="field-error">{{ errorMsg }}</p>
         </div>
 
