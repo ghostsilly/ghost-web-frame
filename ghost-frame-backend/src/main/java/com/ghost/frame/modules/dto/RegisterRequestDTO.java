@@ -2,13 +2,17 @@ package com.ghost.frame.modules.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * @author ghost
  * @description 注册请求参数
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class RegisterRequestDTO {
     /**
      * 用户名
