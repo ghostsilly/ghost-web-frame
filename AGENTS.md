@@ -58,12 +58,15 @@ ghost-web-frame/
 │       │   │       ├── vo/                           # LoginRequestVO（含 token、refreshToken）
 │       │   │       └── enums/                      # UserRole、UserStatus、DeleteFlag
 │       │   └── resources/
-│       │       ├── application.yml                 # 默认配置，profile=local，含 api: /ghost
+│       │       ├── application.yml                 # 默认配置，profile=local，含 api: /ghost、Flyway baseline
 │       │       ├── application-local.yml            # 本机私有配置（不入库）
 │       │       ├── application-local.yml.example
 │       │       ├── config/application-knife4j.yml
+│       │       ├── db/migration/V1__create_user.sql  # 与 schema/user.sql 等价；文件名仍是单下划线
 │       │       └── com/ghost/frame/modules/mapper/UserMapper.xml   # 已配 mapper-locations
-│       └── test/java/com/ghost/frame/GhostFrameBackendApplicationTests.java
+│       └── test/java/com/ghost/frame/
+│           ├── GhostFrameBackendApplicationTests.java
+│           └── modules/UserServiceImplTest.java    # mock Mapper，覆盖注册重复与登录成败
 └── ghost-frame-frontend/
     ├── package.json / package-lock.json              # vue 3.5 / vite 8 / vue-router 4.6 / pinia 4.1 / axios 1.20
     ├── vite.config.js                                # 代理 /ghost → localhost:8080，port 5173
@@ -132,15 +135,16 @@ API 统一前缀：`/ghost/**`（前后端一致，由 `${api}` 配置注入）�
 - CORS 已配置（`SecurityConfig.corsConfigurationSource` 放行 `http://localhost:5173`）
 - knife4j 接口文档（已强制覆盖 springdoc 到 2.7.0 兼容 Spring Framework 6.2.x）
 - 建表 SQL 已落地：`data_table/schema/user.sql`
+- 登录成功 / 失败业务日志在 `UserServiceImpl.login`（不打印密码和 token）
+- `UserServiceImplTest`：mock `UserMapper` / `PasswordEncoder` / `JwtUtil`，覆盖重复用户名注册、密码错误、登录成功签发 token
+- Flyway：`flyway-core`、`flyway-mysql`；`spring.flyway.baseline-on-migrate: true`、`baseline-version: 1`。本机已有库的 `flyway_schema_history` 为 `BASELINE` 版本 1，未重跑建表
 - `application-local.yml` 已落地，`application.yml` 通过 `${mysql.username}` / `${mysql.password}` / `${jwt.jwt-secret}` 注入敏感值
 - 未登录访问受保护接口走 `SecurityConfig.authenticationEntryPoint`，返回 401 统一体
 
 ### 尚未实现
 
-- 登录成功 / 失败业务日志
-- 单元测试 / 集成测试（只有默认上下文加载测试）
-- Flyway
 - 接口权限角色，以及可动态修改的接口权限归属。`UserRole` 只区分账号类型，不参与接口鉴权
+- Flyway 迁移文件名仍是 `V1__create_user.sql`（单下划线）。版本脚本必须是 `V1__create_user.sql`，否则空库启动不会执行这份建表 SQL
 
 ---
 
@@ -182,7 +186,7 @@ API 统一前缀：`/ghost/**`（前后端一致，由 `${api}` 配置注入）�
 | 3 | JWT 鉴权：注册 / 登录 / `/me` | 已完成（含 CORS 放行 `localhost:5173`） |
 | 4 | 前端 Vite 壳 + axios 代理 | 已完成（依赖、代理、目录骨架均就绪） |
 | 5 | 前端登录页 + 路由守卫 + 联调 | 已完成（2026-10-24 人工验收通过） |
-| 6 | 登出与刷新 Token、测试、日志、Flyway | 进行中（2026-10-27）。登出、刷新 Token 已落地。按账号角色做的方法级权限已移除。测试、日志、Flyway 未做 |
+| 6 | 登出与刷新 Token、测试、日志、Flyway | 已落地（2026-10-28）。登出、刷新 Token、登录日志、`UserServiceImplTest`、Flyway 依赖与 baseline 已有。本机 history 为 BASELINE。迁移文件名待改成双下划线。按账号角色做的方法级权限已移除 |
 
 ---
 
@@ -190,7 +194,7 @@ API 统一前缀：`/ghost/**`（前后端一致，由 `${api}` 配置注入）�
 
 1. **`${api}` 占位符必须解析成功**：`LoginRegisterController` 使用 `@RequestMapping("${api}/auth")`，**API 统一前缀为 `/ghost`**。`application.yml` 与 `application-local.yml` **都已定义** `api: /ghost`；若改动前缀，两处必须同步，否则启动报 `Could not resolve placeholder 'api'` 或前后端不一致。
 2. **`UserMapper.xml` 扫描已配置**：文件在 `resources/com/ghost/frame/modules/mapper/` 下，`application.yml` 已加 `mybatis-plus.mapper-locations: classpath*:com.ghost.frame.modules.mapper/*.xml`，无需再改。
-3. **数据库名实际为 `silly_ghost_frame`**（不是早期建议的 `ghost_frame`）。本机需手动建库 + 建 `user` 表（`data_table/schema/user.sql`），否则注册/登录必失败。
+3. **数据库名实际为 `silly_ghost_frame`**（不是早期建议的 `ghost_frame`）。本机库已有 `user` 表，Flyway 只做了 baseline。空库要能自动建表，迁移文件名须为 `V1__create_user.sql`。全量脚本仍是 `data_table/schema/user.sql`。
 4. **access token 有效期 12 小时**（`jwt.expiration-ms: 43200000`），**refresh token 有效期 7 天**（`jwt.refresh-expiration-ms: 604800000`）。Secret 从环境变量 `jwt.jwt-secret` 注入，不入库。两种票用 claim `tokenType` 区分。
 5. **阶段 5 代码仍在工作区**（截至 2026-10-24）：前端业务文件已有实现，但尚未作为一次提交入库。`mvnw` / `mvnw.cmd` / `.mvn/` 以及根目录、后端的 `.gitattributes` 仍未 `git add`。不要把 `application-local.yml` 提交进去。
 6. **`.idea/` 已被忽略**：根 `.gitignore` 第 11 行 `.idea/` 同时覆盖了 `ghost-frame-backend/.idea/`，`git ls-files` 无 IDE 配置污染，无需处理。
@@ -223,9 +227,9 @@ API 统一前缀：`/ghost/**`（前后端一致，由 `${api}` 配置注入）�
 
 1. **登出**：已完成。`POST /ghost/auth/logout` 校验已登录并返回成功。前端先调该接口，无论成败都清本地 token 并回 `/login`。JWT 过期前仍然有效。
 2. **刷新 Token**：已完成。登录和注册返回 `token` 与 `refreshToken`。`POST /ghost/auth/refresh` 放行，用 refresh token 换新的 access token。前端在 access token 过期或 401 时先刷新再重放。refresh token 不入库、不打进明文日志。尚未做服务端吊销。
-3. **测试**：`UserService` 注册（重复用户名失败）、登录（密码错误失败、成功签发 token）有测试覆盖。可用测试库或 mock Mapper，不依赖本机 `application-local.yml` 里的密码。
-4. **日志**：登录成功与失败打业务日志，不打印密码和完整 token。
-5. **Flyway**：用 Flyway 执行 `data_table/schema/user.sql` 的等价迁移，新环境启动即可建表。全量脚本规范不变：之后改表仍要同步 `schema/` 与 `migration/`。
+3. **测试**：已完成。`UserServiceImplTest` 用 Mockito 覆盖重复用户名注册、密码错误、登录成功签发 token，不读 `application-local.yml`。
+4. **日志**：已完成。`UserServiceImpl.login` 记成功与失败，不打印密码和完整 token。
+5. **Flyway**：依赖与 `baseline-on-migrate` 已完成。本机已有库记为版本 1 的 `BASELINE`。`src/main/resources/db/migration/V1__create_user.sql` 还是单下划线，改成 `V1__create_user.sql` 后空库才会执行。之后改表仍要同步 `schema/` 与 `data_table/migration/`。
 
 **验收：** 登录后等到 access token 失效仍能通过 refresh 继续调用 `/me`；登出后旧 access token 访问 `/me` 失败（若尚未做服务端吊销，则以前端清 token、再请求不再带 Authorization 为准，并在代码注释里写明 JWT 在过期前仍然有效）；`mvn test` 通过。
 
@@ -259,8 +263,8 @@ API 统一前缀：`/ghost/**`（前后端一致，由 `${api}` 配置注入）�
 - 修改代码时**不改动无关文件**；保持现有包名 `com.ghost.frame` 与按层分包结构。
 - 密钥、数据库密码不进仓库；本地配置用 `application-local.yml` 或环境变量。
 - 问答与请求权限用中文；代码注释保持简洁，仅解释非显而易见的逻辑。
-- 当前最优先任务：**阶段 6 后端剩余项**（`UserService` 测试、登录日志、Flyway），由用户手写。登出和刷新 Token 已落地。不要把 `UserRole` 写成接口权限。
-- 进度基线核对时间：2026-10-27。阶段 5 已验收。刷新 Token 前后端已接通。按账号角色做的方法级权限已移除。注册页字段顺序为昵称、用户名。登录和注册的密码框使用眼睛图标显隐。
+- 当前最优先任务：把 Flyway 脚本改名为 `V1__create_user.sql`。阶段 6 其余项已由用户写完。不要把 `UserRole` 写成接口权限。
+- 进度基线核对时间：2026-10-28。阶段 5 已验收。阶段 6 的登出、刷新 Token、登录日志、`UserServiceImplTest`、Flyway baseline 已落地。本机 `flyway_schema_history` 为 `BASELINE` 版本 1。按账号角色做的方法级权限已移除。注册页字段顺序为昵称、用户名。登录和注册的密码框使用眼睛图标显隐。
 
 ---
 
