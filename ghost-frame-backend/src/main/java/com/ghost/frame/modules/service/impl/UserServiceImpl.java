@@ -16,6 +16,7 @@ import com.ghost.frame.modules.service.UserService;
 import com.ghost.frame.modules.mapper.UserMapper;
 import com.ghost.frame.modules.vo.LoginRequestVO;
 import com.ghost.frame.security.JwtUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -26,6 +27,7 @@ import org.springframework.stereotype.Service;
 * @createDate 2026-08-09 11:07:24
 */
 @Service
+@Slf4j
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService{
   @Autowired
   private UserMapper userMapper;
@@ -43,11 +45,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     );
     
     if (ObjectUtil.isAllEmpty(user) || !passwordEncoder.matches(loginRequestDTO.getPassword(), user.getPassword())){
+      log.warn("登录失败，用户名：{}，失败原因：{}", loginRequestDTO.getUsername(), ErrorCode.USERNAME_OR_PASSWORD_ERROR.getMessage());
       throw new BusinessException(ErrorCode.USERNAME_OR_PASSWORD_ERROR);
     }
     if (user.getStatus().equals(UserStatus.LOCKED)){
+      log.warn("登录失败，用户名：{}，失败原因：{}", loginRequestDTO.getUsername(), ErrorCode.USER_DISABLED.getMessage());
       throw new BusinessException(ErrorCode.USER_DISABLED);
     }
+    log.info("登录成功，用户名：{}，用户id：{}", user.getUsername(), user.getId());
     return new LoginRequestVO(
         user.getId(), 
         user.getNickname(), 
