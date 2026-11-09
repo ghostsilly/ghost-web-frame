@@ -1,15 +1,15 @@
 package com.ghost.frame.modules;
 
 import com.ghost.frame.common.throwable.exception.BusinessException;
-import com.ghost.frame.modules.dto.LoginRequestDTO;
-import com.ghost.frame.modules.dto.RegisterRequestDTO;
-import com.ghost.frame.modules.entity.User;
-import com.ghost.frame.modules.enums.DeleteFlag;
-import com.ghost.frame.modules.enums.UserRole;
-import com.ghost.frame.modules.enums.UserStatus;
-import com.ghost.frame.modules.mapper.UserMapper;
-import com.ghost.frame.modules.service.impl.UserServiceImpl;
-import com.ghost.frame.modules.vo.LoginRequestVO;
+import com.ghost.frame.modules.user.dto.LoginRequestDTO;
+import com.ghost.frame.modules.user.dto.RegisterRequestDTO;
+import com.ghost.frame.modules.user.entity.User;
+import com.ghost.frame.modules.common.enums.DeleteFlag;
+import com.ghost.frame.modules.user.enums.UserRole;
+import com.ghost.frame.modules.user.enums.UserStatus;
+import com.ghost.frame.modules.user.mapper.UserMapper;
+import com.ghost.frame.modules.user.service.impl.UserServiceImpl;
+import com.ghost.frame.modules.user.vo.LoginRequestVO;
 import com.ghost.frame.security.JwtUtil;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

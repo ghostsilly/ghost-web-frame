@@ -1,0 +1,1 @@
+ALTER TABLE `user` add COLUMN `remark` VARCHAR(255) DEFAULT NULL COMMENT '备注';
