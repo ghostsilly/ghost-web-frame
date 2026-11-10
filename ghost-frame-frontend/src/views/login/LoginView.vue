@@ -63,6 +63,11 @@ function resolveRedirect() {
   if (typeof target === 'string' && target.startsWith('/') && !target.startsWith('//')) {
     return target
   }
+  // 无显式回跳目标时，管理员/超级管理员默认进管理后台
+  const role = userStore.userInfo?.role
+  if (role === 'ADMIN' || role === 'SUPER_ADMIN') {
+    return '/admin'
+  }
   return '/'
 }
 </script>

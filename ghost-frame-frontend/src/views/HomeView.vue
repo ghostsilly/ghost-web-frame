@@ -68,6 +68,7 @@ async function handleLogout() {
     <p v-else-if="loading" class="tip">正在加载用户信息</p>
 
     <div class="actions">
+      <button type="button" class="btn-ghost" @click="router.push('/admin')">进入管理后台</button>
       <button type="button" class="btn-ghost" @click="handleLogout">登出</button>
     </div>
   </main>
@@ -104,6 +105,8 @@ async function handleLogout() {
 }
 
 .actions {
+  display: flex;
+  gap: 12px;
   margin-top: 32px;
 }
 

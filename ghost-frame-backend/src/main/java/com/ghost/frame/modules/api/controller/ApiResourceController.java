@@ -25,8 +25,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ApiResourceController extends BaseController {
 
-  private final ApiResourceService apiResourceService
-      ;
+  private final ApiResourceService apiResourceService;
 
   @Operation(summary = "扫描并比对接口差异（只读，不写库）")
   @PostMapping("/scan-diff")
