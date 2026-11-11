@@ -50,6 +50,13 @@
             <version>${mybatis-plus.version}</version>
         </dependency>
 
+        <!-- mybatis-plus JSqlParser 分页等插件 -->
+        <dependency>
+            <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus-jsqlparser</artifactId>
+            <version>${mybatis-plus.version}</version>
+        </dependency>
+
         <!-- lombok -->
         <dependency>
             <groupId>org.projectlombok</groupId>

@@ -1,5 +1,5 @@
 
-package com.ghost.frame.common;
+package com.ghost.frame.modules.common.entity;
 
 import com.ghost.frame.common.throwable.enums.ErrorCode;
 import lombok.AllArgsConstructor;

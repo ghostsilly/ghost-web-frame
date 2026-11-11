@@ -1,7 +1,7 @@
 package com.ghost.frame.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ghost.frame.common.Response;
+import com.ghost.frame.modules.common.entity.Response;
 import com.ghost.frame.common.throwable.enums.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;

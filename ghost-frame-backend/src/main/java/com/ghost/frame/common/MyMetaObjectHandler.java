@@ -2,6 +2,7 @@ package com.ghost.frame.common;
 
 import com.baomidou.mybatisplus.core.handlers.MetaObjectHandler;
 import org.apache.ibatis.reflection.MetaObject;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -9,6 +10,7 @@ import java.time.LocalDateTime;
 /**
  * MyBatis-Plus 自动填充：创建/更新时间与操作人
  * 自定义元数据处理器
+ * @author 34592
  */
 @Component
 public class MyMetaObjectHandler implements MetaObjectHandler {
@@ -43,7 +45,12 @@ public class MyMetaObjectHandler implements MetaObjectHandler {
      * JWT 接入前可返回 null；接入后从 SecurityContext 读取。
      */
     private Long getCurrentUserId() {
-        // TODO: 阶段 C 鉴权完成后改为从 SecurityContext 获取
-        return null;
+        return Long.valueOf(
+            SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getPrincipal()
+                .toString()
+        );
     }
 }

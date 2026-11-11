@@ -51,7 +51,5 @@ public class User extends BaseEntity {
      *1-正常  0-禁用
      */
     private UserStatus status;
-
     
-
 }

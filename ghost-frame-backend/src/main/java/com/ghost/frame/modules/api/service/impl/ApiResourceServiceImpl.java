@@ -24,6 +24,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
+ * API 资源实现类
  * @author 34592
  */
 @Service

@@ -5,9 +5,11 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ghost.frame.common.throwable.enums.ErrorCode;
 import com.ghost.frame.common.throwable.exception.BusinessException;
+import com.ghost.frame.modules.common.entity.PageResult;
 import com.ghost.frame.modules.user.dto.LoginRequestDTO;
 import com.ghost.frame.modules.user.dto.RefreshRequestDTO;
 import com.ghost.frame.modules.user.dto.RegisterRequestDTO;
+import com.ghost.frame.modules.user.dto.UserPageDTO;
 import com.ghost.frame.modules.user.entity.User;
 import com.ghost.frame.modules.common.enums.DeleteFlag;
 import com.ghost.frame.modules.user.enums.UserRole;
@@ -15,6 +17,7 @@ import com.ghost.frame.modules.user.enums.UserStatus;
 import com.ghost.frame.modules.user.service.UserService;
 import com.ghost.frame.modules.user.mapper.UserMapper;
 import com.ghost.frame.modules.user.vo.LoginRequestVO;
+import com.ghost.frame.modules.user.vo.UserPageVO;
 import com.ghost.frame.security.JwtUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -152,6 +155,17 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         jwtUtil.generateAccessToken(user.getId(), user.getUsername()),
         refreshRequestDTO.getRefreshToken()
     );
+  }
+
+  /**
+   * 用户信息分页查询
+   * @param dto 分页查询参数
+   * @return 分页查询结果
+   */
+  @Override
+  public PageResult<UserPageVO> pageUsers(UserPageDTO dto) {
+    
+    return null;
   }
 }
 

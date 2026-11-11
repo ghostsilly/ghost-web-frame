@@ -1,7 +1,7 @@
 
 package com.ghost.frame.common.throwable;
 
-import com.ghost.frame.common.Response;
+import com.ghost.frame.modules.common.entity.Response;
 import com.ghost.frame.common.throwable.exception.BusinessException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.MethodArgumentNotValidException;

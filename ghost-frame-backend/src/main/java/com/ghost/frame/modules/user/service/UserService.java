@@ -1,11 +1,14 @@
 package com.ghost.frame.modules.user.service;
 
+import com.ghost.frame.modules.common.entity.PageResult;
 import com.ghost.frame.modules.user.dto.LoginRequestDTO;
 import com.ghost.frame.modules.user.dto.RefreshRequestDTO;
 import com.ghost.frame.modules.user.dto.RegisterRequestDTO;
+import com.ghost.frame.modules.user.dto.UserPageDTO;
 import com.ghost.frame.modules.user.entity.User;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.ghost.frame.modules.user.vo.LoginRequestVO;
+import com.ghost.frame.modules.user.vo.UserPageVO;
 import jakarta.validation.Valid;
 
 /**
@@ -22,4 +25,6 @@ public interface UserService extends IService<User> {
   LoginRequestVO obtainTheCurrentUser(Long userId);
   
   LoginRequestVO refresh(@Valid RefreshRequestDTO refreshRequestDTO);
+
+  PageResult<UserPageVO> pageUsers(@Valid UserPageDTO dto);
 }

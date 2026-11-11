@@ -1,6 +1,6 @@
 package com.ghost.frame.modules.user.controller;
 
-import com.ghost.frame.common.Response;
+import com.ghost.frame.modules.common.entity.Response;
 import com.ghost.frame.modules.common.controller.BaseController;
 import com.ghost.frame.modules.user.dto.LoginRequestDTO;
 import com.ghost.frame.modules.user.dto.RefreshRequestDTO;
@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
  */
 @RestController
 @RequestMapping("${api}/auth")
-@Tag(name = "用户模块", description = "用户的CRUD接口")
+@Tag(name = "登录模块", description = "登录注册认证映射")
 public class LoginRegisterController extends BaseController {
   
   @Autowired

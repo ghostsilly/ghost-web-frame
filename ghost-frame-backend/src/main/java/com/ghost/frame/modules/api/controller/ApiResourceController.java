@@ -1,6 +1,6 @@
 package com.ghost.frame.modules.api.controller;
 
-import com.ghost.frame.common.Response;
+import com.ghost.frame.modules.common.entity.Response;
 import com.ghost.frame.modules.api.dto.ApiResourceApplyDTO;
 import com.ghost.frame.modules.api.entity.ApiResource;
 import com.ghost.frame.modules.api.service.ApiResourceService;
