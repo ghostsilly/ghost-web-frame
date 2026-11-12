@@ -24,7 +24,7 @@ data_table/
    - 第二段 `CREATE INDEX` / `CREATE UNIQUE INDEX`：所有二级索引单独写，不要内嵌在 `CREATE TABLE` 里。
 3. **每个字段都必须有 `COMMENT '...'`**，表本身也要有 `COMMENT='...'`；缺注释不允许入库。
 4. 表名、字段名一律**小写下划线**；字符串统一 `utf8mb4 / utf8mb4_unicode_ci`；引擎 `InnoDB`；`ROW_FORMAT = Dynamic`。
-5. **公共字段必须包含**（与 `com.ghost.frame.modules.entity.BaseEntity` 对齐）：
+5. **公共字段必须包含**（与 `com.ghost.frame.modules.common.entity.BaseEntity` 对齐）：
 
    | 字段 | 类型 | 说明 |
    | --- | --- | --- |
@@ -34,6 +34,7 @@ data_table/
    | `updated_date` | datetime | 更新时间，ON UPDATE CURRENT_TIMESTAMP |
    | `updated_by` | bigint, NULL | 更新人 ID |
    | `deleted` | tinyint, 默认 0 | 逻辑删除：0-未删，1-已删 |
+   | `remark` | varchar(255), NULL | 备注，人工维护，不参与扫描比对 |
 
 6. 索引命名：
    - 主键：在建表语句内 `PRIMARY KEY (id)`。
@@ -73,8 +74,8 @@ data_table/
 4. 脚本内容只写 `ALTER TABLE ... ADD / MODIFY / CHANGE / ADD INDEX ...` 或 `CREATE TABLE ...`（新建表的增量脚本），**禁止 `DROP TABLE`、`DROP COLUMN`（除非明确数据已废弃）、`DELETE`、`UPDATE` 生产数据**。
 5. 每次表结构变更：
    - 新环境要看到最新结构 → **同步修改 `schema/` 下对应的全量脚本**；
-   - 老环境升级 → 在 `migration/{年}/{月}/{日}/` 下新增一个脚本。
-6. 后续若引入 Flyway，由于 Flyway 默认不递归扫描多层日期目录，需要把脚本铺平到单个目录，或配置 `spring.flyway.locations` 按日期目录逐个列出；按日期分目录主要是为了人工按时间线查阅。
+   - 老环境升级 → 在 `migration/{年}/{月}/{日}/` 下新增一个脚本，并在目标库手工执行。
+6. 项目不使用 Flyway。启动不会自动建表或改表，`schema/` 与 `migration/` 都只供人工执行。
 
 ## 标准模板
 

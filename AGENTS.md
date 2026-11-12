@@ -80,7 +80,6 @@ ghost-web-frame/
 │       │   ├── application-local.yml      # 本机私有（不入库）
 │       │   ├── application-local.yml.example
 │       │   ├── config/application-knife4j.yml
-│       │   ├── db/migration/V1__create_user.sql   # ⚠ 仅此一份，缺 api_resource 与 remark
 │       │   └── com/ghost/frame/modules/user/mapper/UserMapper.xml  # 已与接口同包
 │       └── test/java/com/ghost/frame/
 │           ├── GhostFrameBackendApplicationTest.java   # 注意文件名无 s
@@ -171,7 +170,7 @@ API 统一前缀：`/ghost/**`，由 `${api}` 配置注入。
 - MySQL + MyBatis-Plus（逻辑删除 `deleted`、下划线转驼峰、`id-type: auto`）
 - `BaseEntity` 承载公共字段：`createdDate` / `createdBy` / `updatedDate` / `updatedBy` / `deleted` / `remark`。`deleted` 与 `remark` 已从 `User` 上移到此基类
 - `MyMetaObjectHandler` 自动填充创建/更新的时间与操作人
-- Flyway：`flyway-core` + `flyway-mysql`，`baseline-on-migrate: true`、`baseline-version: 1`；`db/migration` 仍只有 `V1__create_user.sql`
+- 表结构只由 `data_table/` 手工维护（全量 `schema/`、增量 `migration/`）。不使用 Flyway，启动不自动建表或改表
 - `UserMapper.xml` 已放到 `resources/com/ghost/frame/modules/user/mapper/`，与 Mapper 接口同包
 
 **接口资源池（阶段 7 第一块，2026-11-09）**
@@ -243,8 +242,8 @@ API 统一前缀：`/ghost/**`，由 `${api}` 配置注入。
 | 3 | JWT 鉴权：注册 / 登录 / `/me` | 已完成 |
 | 4 | 前端 Vite 壳 + axios 代理 | 已完成 |
 | 5 | 前端登录页 + 路由守卫 + 联调 | 已完成（2026-10-24 验收） |
-| 6 | 登出与刷新 Token、测试、日志、Flyway、仓库补齐 | 已完成（2026-11-06 验收）。空库自动建表、Token 刷新链路、`mvn test` 三项实测通过 |
-| **7a** | **按业务模块重构分包 + 接口资源池** | **进行中（2026-11-09）**。分包重构、扫描/比对/应用三接口、启动类去掉 `@MapperScan`、`UserMapper.xml` 迁到 `modules/user/mapper/` 已完成。**空库仍缺 Flyway 的 `remark` 与 `api_resource`（问题 2–4）；`mapper-locations` 仍用点号路径（问题 1 残留）** |
+| 6 | 登出与刷新 Token、测试、日志、仓库补齐 | 已完成（2026-11-06 验收）。Token 刷新链路、`mvn test` 实测通过。表结构后改为 `data_table/` 手工维护 |
+| **7a** | **按业务模块重构分包 + 接口资源池** | **进行中**。分包重构、扫描/比对/应用三接口、启动类去掉 `@MapperScan`、`UserMapper.xml` 迁到 `modules/user/mapper/` 已完成。2026-11-12 已移除 Flyway，建表改为手工执行 `data_table/` |
 | 7b | 权限模型：权限点、权限角色、用户关联 | 未开始 |
 | 7c | 接口级校验过滤器 + `SecurityConfig` 放行收紧 | 未开始 |
 | 7d | 前端权限：拉取权限集合、路由与菜单过滤 | 未开始 |
@@ -260,23 +259,19 @@ API 统一前缀：`/ghost/**`，由 `${api}` 配置注入。
 
 ## 已知问题与约束（改动前必读）
 
-### A. 重构遗留（问题 2–4 仍会让空库跑不起来）
+### A. 重构遗留
 
-1. **`UserMapper.xml` 已与接口同包；`mapper-locations` 仍是点号路径（部分修复）。** XML 现位于 `resources/com/ghost/frame/modules/user/mapper/UserMapper.xml`，与 `com.ghost.frame.modules.user.mapper.UserMapper` 同包，MyBatis 可按同包约定加载 `getUserInformation`，原先 `/me` 的 `Invalid bound statement` 应已解除。`application.yml` 现为 `mapper-locations: classpath*:com.ghost.frame.modules.**.mapper/*.xml`，**点号在 classpath 资源解析里是字面字符**，匹配不到斜杠目录下的 XML，这条配置实际不起作用。当前靠同包自动加载兜底；后续模块若把 XML 放到非同包路径仍会绑不上。请改成斜杠通配 `classpath*:com/ghost/frame/modules/**/mapper/*.xml`。
+1. **`mapper-locations` 已改为斜杠通配** `classpath*:com/ghost/frame/modules/**/mapper/*.xml`。`UserMapper.xml` 与接口同包。
 
-2. **`api_resource` 表没有 Flyway 脚本。** 只有 `data_table/schema/api_resource.sql`，`db/migration/` 下仍只有 `V1__create_user.sql`。空库启动不会建这张表，三个 `/ghost/api-resource/**` 接口一调就报表不存在。建议先占 `V2` 给 `user.remark`，再补 `db/migration/V3__create_api_resource.sql`（内容照搬全量脚本，**去掉 `DROP TABLE`**）。
+2. **不再使用 Flyway。** 空库启动不会建表。新环境需手工执行 `data_table/schema/` 下的全量脚本（`user.sql`、`api_resource.sql`）。已有库若缺列或表，执行 `data_table/migration/` 中对应增量脚本。库里残留的 `flyway_schema_history` 可手工删除，应用不再读写它。
 
-3. **`user` 表的 `remark` 字段只存在于增量脚本，未同步到全量脚本与 Flyway。** `BaseEntity` 已新增 `remark`，但 `data_table/schema/user.sql` 和 `db/migration/V1__create_user.sql` 都没有这一列；唯一的 `data_table/migration/2026/11/06/user_add_remark.sql` **不在 Flyway 扫描路径内**（Flyway 只扫 `db/migration`），不会被自动执行。后果：新建空库跑起来后，`user` 表无 `remark` 列，而 MyBatis-Plus 的 `selectOne` / `selectList` 会生成包含全部实体字段的 SELECT，直接报 `Unknown column 'remark' in 'field list'`——登录、注册、刷新全挂。插入因走 `NOT_NULL` 策略（remark 为 null 不进 INSERT）暂时不受影响，所以问题只在查询侧暴露。
-
-   需三处同步：`schema/user.sql` 加列、新增 `db/migration/V2__*` 或 `V3__*`（**不要改 `V1`**，本机库校验和会不匹配导致启动失败）、确认本机库已执行过该 `ALTER`。这同时违反了 `data_table/README.md` 自己定的「改表时全量脚本和 migration 都要同步改」。
-
-4. **`data_table/README.md` 里的 `BaseEntity` 包路径已过期。** 文中写 `com.ghost.frame.modules.entity.BaseEntity`，实际是 `com.ghost.frame.modules.common.entity.BaseEntity`。同文件「公共字段必须包含」的表格也缺 `remark`。
+3. **`data_table/README.md` 里的 `BaseEntity` 包路径可能仍过期。** 实际类在 `com.ghost.frame.modules.common.entity.BaseEntity`。公共字段应含 `remark`。
 
 ### B. 既有约定与隐患
 
 5. **`${api}` 占位符必须解析成功**：控制器用 `@RequestMapping("${api}/auth")`、`@RequestMapping("${api}/api-resource")`，**统一前缀 `/ghost`**。`application.yml` 与 `application-local.yml` 都定义了 `api: /ghost`，改前缀两处必须同步。
 6. **`@RequestMapping` 不要在 `${api}` 前再加斜杠**：写成 `/${api}` 会拼出双斜杠。
-7. **数据库名为 `silly_ghost_frame`**（不是早期建议的 `ghost_frame`）。本机已有库的 `flyway_schema_history` 记为 `BASELINE` 版本 1；新建空库启动记为 `MIGRATION` 版本 1 并自动建表。
+7. **数据库名为 `silly_ghost_frame`**（不是早期建议的 `ghost_frame`）。建表与改表只通过 `data_table/` 手工执行。
 8. **access token 有效期 6 小时**（`jwt.expiration-ms: 21600000`，`application.yml` 注释写作「半天」），**refresh token 7 天**（`jwt.refresh-expiration-ms: 604800000`）。Secret 从 `application-local.yml` 的 `jwt.jwt-secret` 注入，不入库。两种票用 claim `tokenType` 区分。
 9. **后端端口 10583**（`server.port`），不是 8080。`vite.config.js` 代理 target 已是 `http://localhost:10583`，两处必须一起改。前端 dev 端口 5173。
 10. **不要把 `application-local.yml` 提交进去**（`.gitignore` 第 36 行 `**/application-local.yml` 已覆盖，仓库只留 `.example`）。`.idea/` 也已被根 `.gitignore` 第 11 行忽略。
@@ -303,31 +298,23 @@ API 统一前缀：`/ghost/**`，由 `${api}` 配置注入。
 - 公共字段对齐 `com.ghost.frame.modules.common.entity.BaseEntity`：`id` / `created_date` / `created_by` / `updated_date` / `updated_by` / `deleted` / `remark`
 - 索引命名：唯一索引 `uk_{表缩写}_{字段}`，普通索引 `idx_{表缩写}_{字段}`
 - 全量脚本放 `data_table/schema/`（可带 `DROP TABLE IF EXISTS`）；增量脚本放 `data_table/migration/{年}/{月}/{日}/`，动词开头命名，开头必须有中英文双语注释块，只允许 `ALTER` / 新建表，禁止 `DROP TABLE`
-- **改表时全量脚本、增量脚本、`db/migration/V{N}__*.sql` 三处都要同步**（问题 3 就是漏了后两处）
-- **Flyway 脚本不可改已执行过的版本**：改 `V1__create_user.sql` 会让本机库校验和不匹配而启动失败，只能新增 `V2__`、`V3__`
-- **Flyway 只扫 `db/migration`**，不扫 `data_table/migration`。后者的按日期分目录是为了人工按时间线查阅，两者需要手动保持同步
+- **改表时同步全量脚本，并新增一份增量脚本**。两处都要人工执行到目标库，启动不会跑它们
+- **不要再引入 Flyway，也不要恢复 `src/main/resources/db/migration/`**
 
 ### 当前两张表
 
-| 表 | 全量脚本 | Flyway | 增量 | 说明 |
-| --- | --- | --- | --- | --- |
-| `user` | `schema/user.sql` | `V1__create_user.sql` | `migration/2026/11/06/user_add_remark.sql` | ⚠ 三处字段不一致，见问题 3 |
-| `api_resource` | `schema/api_resource.sql` | **缺** | 无 | ⚠ 见问题 2 |
+| 表 | 全量脚本 | 增量 | 说明 |
+| --- | --- | --- | --- |
+| `user` | `schema/user.sql` | `migration/2026/11/06/user_add_remark.sql` | 已有库若缺 `remark`，执行该增量 |
+| `api_resource` | `schema/api_resource.sql` | 无 | 空库直接执行全量脚本 |
 
 ---
 
 ## 下一步
 
-### 1. 先修问题 2–4，并收尾问题 1（阻塞项）
+### 1. 表结构
 
-`UserMapper.xml` 已迁到新包，`/me` 的 statement 绑定不再是第一阻塞。空库启动仍会缺 `remark` 列和 `api_resource` 表。建议顺序：
-
-1. 补 `user` 表的 `remark`：同步 `schema/user.sql`，新增 `db/migration/V2__add_user_remark.sql`，确认本机库已执行
-2. 补 `db/migration/V3__create_api_resource.sql`
-3. 把 `mapper-locations` 改成斜杠通配 `classpath*:com/ghost/frame/modules/**/mapper/*.xml`（问题 1 残留）
-4. 更新 `data_table/README.md` 的 `BaseEntity` 路径与公共字段表
-
-修完验证三件事：空库启动能建出两张表且字段完整、`mvn test` 通过、登录后 `/me` 能正常返回。
+空库先手工执行 `data_table/schema/user.sql` 与 `data_table/schema/api_resource.sql`。启动不会建表。`data_table/README.md` 的 `BaseEntity` 路径与公共字段表仍可能过期，改文档时对齐 `modules.common.entity.BaseEntity`（含 `remark`）。
 
 ### 2. 阶段 7b：权限模型
 
@@ -339,7 +326,7 @@ API 统一前缀：`/ghost/**`，由 `${api}` 配置注入。
 
 倾向**多对多**而非在 `api_resource` 上加 `permission_code` 单字段：AGENTS 要求「支持动态修改接口归属」，多对多下只是改关联行，单字段下会变成改接口自身属性，语义更别扭。
 
-表建好后按 `data_table/` 规范同步三处脚本。
+表建好后按 `data_table/` 规范写全量脚本和增量脚本，并手工执行。
 
 ### 3. 阶段 7c：接口级校验
 
@@ -381,8 +368,8 @@ API 统一前缀：`/ghost/**`，由 `${api}` 配置注入。
 - 修改代码时**不改动无关文件**；保持包名 `com.ghost.frame` 与「按业务模块分包」结构
 - 密钥、数据库密码不进仓库；本地配置用 `application-local.yml` 或环境变量
 - 问答与请求权限用中文；代码注释保持简洁，仅解释非显而易见的逻辑
-- **当前最优先任务：修掉已知问题 2–4**（空库 `remark` + `api_resource` Flyway + `data_table/README.md`），并把 `mapper-locations` 改成斜杠通配。之后进入阶段 7b 权限模型设计，第一步是定模型和表结构，不是直接写过滤器
-- 进度基线核对时间：**2026-11-09**。阶段 0–6 已验收；阶段 7a 业务代码与 XML 同包迁移已落地，问题 1 仅剩 `mapper-locations` 点号路径，问题 2–4 未修；工作区有大量未提交改动，最新提交仍是 `3587ce1`
+- **不要加回 Flyway。** 表结构只维护在 `data_table/`，由人工执行。当前优先进入阶段 7b 权限模型设计，第一步是定模型和表结构，不是直接写过滤器
+- 进度基线：阶段 0–6 已验收；阶段 7a 进行中。2026-11-12 已移除 Flyway 依赖、`spring.flyway` 配置和 `db/migration` 脚本
 
 ---
 

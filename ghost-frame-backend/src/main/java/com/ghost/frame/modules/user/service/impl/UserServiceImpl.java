@@ -2,6 +2,7 @@ package com.ghost.frame.modules.user.service.impl;
 
 import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ghost.frame.common.throwable.enums.ErrorCode;
 import com.ghost.frame.common.throwable.exception.BusinessException;
@@ -164,8 +165,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
    */
   @Override
   public PageResult<UserPageVO> pageUsers(UserPageDTO dto) {
-    
-    return null;
+    Page<UserPageVO> userPageVOPage = new Page<>(dto.getPageNum(), dto.getPageSize());
+    Page<UserPageVO> userVOPage = userMapper.selectUserPage(userPageVOPage, dto);
+    return PageResult.of(userVOPage);
   }
 }
 

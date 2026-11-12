@@ -16,6 +16,7 @@ CREATE TABLE `user` (
   `updated_date`  datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   `updated_by`    bigint       NULL DEFAULT NULL COMMENT '更新人 ID',
   `deleted`       tinyint      NOT NULL DEFAULT 0 COMMENT '删除状态：0-未删，1-已删',
+  `remark`        varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '备注',
   PRIMARY KEY (`id`)
 ) ENGINE = InnoDB
   CHARACTER SET = utf8mb4

@@ -1,5 +1,6 @@
 package com.ghost.frame.modules.user.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -13,21 +14,25 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Schema(description = "注册请求参数")
 public class RegisterRequestDTO {
     /**
      * 用户名
      */
     @NotBlank(message = "用户名不能为空")
+    @Schema(description = "用户名")
     @Size(min = 5, max = 20, message = "用户名长度在5到20个字符之间")
     private String username;
     /**
      * 密码
      */
     @NotBlank(message = "密码不能为空")
+    @Schema(description = "密码")
     private String password;
     /**
      * 昵称
      */
     @NotBlank(message = "昵称不能为空")
+    @Schema(description = "昵称")
     private String nickname;
 }

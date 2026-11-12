@@ -39,7 +39,7 @@ com.ghost.frame
 
 创建库 `silly_ghost_frame`，字符集 `utf8mb4`。
 
-Flyway 已接入，启动时会自动执行 `ghost-frame-backend/src/main/resources/db/migration/` 下的脚本，并写入 `flyway_schema_history`。配置为 `baseline-on-migrate: true`、`baseline-version: 1`：已有数据的库记为 `BASELINE`，空库记为 `MIGRATION` 并自动建表。
+表结构不由启动自动维护。在空库上按顺序手工执行 `ghost-frame-backend/data_table/schema/` 下的全量脚本；已有库只执行尚未跑过的 `data_table/migration/{年}/{月}/{日}/` 增量脚本。
 
 当前涉及的表：
 
@@ -48,7 +48,7 @@ Flyway 已接入，启动时会自动执行 `ghost-frame-backend/src/main/resour
 | `user` | `ghost-frame-backend/data_table/schema/user.sql` | 用户与鉴权 |
 | `api_resource` | `ghost-frame-backend/data_table/schema/api_resource.sql` | 接口资源池，供后续权限配置选用 |
 
-`data_table/` 存放人工维护的表结构脚本（全量 `schema/` + 按日期分目录的增量 `migration/`），规范见 `ghost-frame-backend/data_table/README.md`。它与 Flyway 的 `db/migration/` 是两套目录，改表时需要同步。
+`data_table/` 是唯一的表结构来源（全量 `schema/` + 按日期分目录的增量 `migration/`），规范见 `ghost-frame-backend/data_table/README.md`。改表时同步全量脚本，并另写一份增量脚本供已有库执行。
 
 ## 后端
 
@@ -107,7 +107,7 @@ npm run dev
 
 ## 联调顺序
 
-1. MySQL 已建库，两张表已就绪
+1. MySQL 已建库，并已手工执行 `data_table/schema/` 中的全量脚本
 2. `application-local.yml` 已填写
 3. 后端在 10583 启动
 4. 前端在 5173 启动
@@ -115,15 +115,7 @@ npm run dev
 
 ## 当前状态
 
-阶段 0–6 已完成并验收（鉴权闭环、Token 刷新、测试、Flyway、仓库补齐）。正在进行的是接口资源池与后续的权限体系。
-
-刚完成的按业务模块分包重构留下了几处配置未跟上，会影响启动与 `/me` 接口，详见 `AGENTS.md` 的「已知问题」A 组：
-
-- `UserMapper.xml` 仍在旧的 `modules/mapper/` 资源目录下，且 `mapper-locations` 用的是点号路径，`/me` 会报 `Invalid bound statement (not found)`
-- `api_resource` 表缺 Flyway 脚本，空库启动不会建表
-- `user` 表的 `remark` 字段只在 `data_table/migration/` 的增量脚本里，未同步到全量脚本和 Flyway，且该增量脚本不在 Flyway 扫描路径内；新建空库查询用户会报 `Unknown column 'remark'`
-
-这四项修完前，新环境建议直接手动执行 `data_table/schema/` 下的两份全量脚本，并给 `user` 表补上 `remark` 列。
+阶段 0–6 已完成并验收（鉴权闭环、Token 刷新、测试、仓库补齐）。表结构改为只由 `data_table/` 手工维护，启动不再执行迁移。正在进行的是接口资源池与后续的权限体系。
 
 ## 开发约定
 
@@ -131,4 +123,4 @@ npm run dev
 
 - 后端代码由开发者手动维护
 - 密钥、数据库密码不进仓库
-- 改表时全量脚本、增量脚本、Flyway 脚本三处同步；**不要修改已执行过的 Flyway 版本文件**，否则本机库校验和不匹配会导致启动失败
+- 改表时同步 `data_table/schema/` 全量脚本，并在 `data_table/migration/` 新增增量脚本后手工执行

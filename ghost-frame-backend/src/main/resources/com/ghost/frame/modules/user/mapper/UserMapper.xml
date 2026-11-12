@@ -39,4 +39,39 @@
             </if>
         </where>
     </select>
+    
+    <resultMap id="UserPageVO" type="com.ghost.frame.modules.user.vo.UserPageVO">
+        <id property="id" column="id" />
+        <result property="nickname" column="nickname" />
+        <result property="username" column="username" />
+        <result property="role" column="role" />
+        <result property="status" column="status" />
+        <result property="createdTime" column="created_date" />
+        <result property="updatedTime" column="updated_date" />
+    </resultMap>
+    
+    <!-- 分页查询用户列表 -->
+    <select id="selectUserPage" resultMap="UserPageVO">
+        select 
+            id,
+            nickname,
+            username,
+            role,
+            status,
+            created_date,
+            updated_date
+        from user
+        <where>
+            <if test="dto.username != null and dto.username != ''">
+                username = #{dto.username}
+            </if>
+            <if test="dto.nickname != null and dto.nickname != ''">
+                nickname = #{dto.nickname}
+            </if>
+            <if test="dto.status != null and dto.status != ''">
+                status = #{dto.status}
+            </if>
+        </where>
+        order by updated_date desc
+    </select>
 </mapper>
