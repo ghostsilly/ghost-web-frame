@@ -11,6 +11,7 @@ import java.util.List;
  * @author 34592
  */
 @Data
+@Schema(description = "分页结果")
 public class PageResult<T> {
   /** 
    * 当前页码 

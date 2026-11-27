@@ -18,32 +18,32 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @TableName(value = "api_resource")
-@Schema(description = "后端 api 接口资源类")
+@Schema(description = "接口资源。path 是路径 pattern，含 BaseEntity 公共字段")
 public class ApiResource extends BaseEntity {
   /**
    * 主键
    */
-  @Schema(description = "主键")
+  @Schema(description = "主键。新增项可不传，更新项必须带 id")
   private Long id;
   /**
    * 路径
    */
-  @Schema(description = "路径")
+  @Schema(description = "路径 pattern")
   private String path;
   /**
    * 方法
    */
-  @Schema(description = "方法")
+  @Schema(description = "HTTP 方法，空串表示不限")
   private String method;
   /**
    * 模块
    */
-  @Schema(description = "模块")
+  @Schema(description = "模块，取控制器 @Tag.name")
   private String module;
   /**
    * 简要描述
    */
-  @Schema(description = "简要描述")
+  @Schema(description = "简要描述，取方法 @Operation.summary")
   private String summary;
   /**
    * 处理类

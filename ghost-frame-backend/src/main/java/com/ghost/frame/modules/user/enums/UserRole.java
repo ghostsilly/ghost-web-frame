@@ -1,6 +1,7 @@
 package com.ghost.frame.modules.user.enums;
 
 import com.baomidou.mybatisplus.annotation.EnumValue;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 
 import java.util.Arrays;
@@ -11,6 +12,7 @@ import java.util.Arrays;
  */
 
 @Getter
+@Schema(description = "用户角色。JSON 为枚举名。USER 普通用户，ADMIN 管理员，SUPER_ADMIN 超级管理员")
 public enum UserRole {
     USER("USER","普通用户"),
     ADMIN("ADMIN","管理员"),

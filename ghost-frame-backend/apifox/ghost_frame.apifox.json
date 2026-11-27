@@ -1,0 +1,2013 @@
+{
+  "apifoxProject": "1.0.0",
+  "$schema": {
+    "app": "apifox",
+    "type": "project",
+    "version": "1.2.0"
+  },
+  "info": {
+    "name": "ghost_frame",
+    "description": ""
+  },
+  "projectSetting": {
+    "id": "9091441",
+    "auth": {},
+    "securityScheme": {},
+    "gateway": [],
+    "language": "zh-CN",
+    "apiStatuses": [
+      "developing",
+      "testing",
+      "released",
+      "deprecated"
+    ],
+    "mockSettings": {},
+    "preProcessors": [],
+    "postProcessors": [],
+    "advancedSettings": {},
+    "servers": [
+      {
+        "id": "default",
+        "name": "默认服务",
+        "moduleId": 8885611
+      }
+    ]
+  },
+  "apiCollection": [
+    {
+      "name": "根目录",
+      "id": 99628932,
+      "auth": {},
+      "securityScheme": {},
+      "parentId": 0,
+      "serverId": "",
+      "description": "",
+      "identityPattern": {
+        "httpApi": {
+          "type": "methodAndPath",
+          "bodyType": "",
+          "fields": []
+        }
+      },
+      "shareSettings": {},
+      "visibility": "SHARED",
+      "moduleId": 8885611,
+      "preProcessors": [
+        {
+          "id": "inheritProcessors",
+          "type": "inheritProcessors",
+          "data": {}
+        }
+      ],
+      "postProcessors": [
+        {
+          "id": "inheritProcessors",
+          "type": "inheritProcessors",
+          "data": {}
+        }
+      ],
+      "inheritPostProcessors": {},
+      "inheritPreProcessors": {},
+      "items": [
+        {
+          "name": "用户管理",
+          "id": 99629000,
+          "auth": {},
+          "securityScheme": {},
+          "parentId": 0,
+          "serverId": "",
+          "description": "",
+          "identityPattern": {
+            "httpApi": {
+              "type": "inherit",
+              "bodyType": "",
+              "fields": []
+            }
+          },
+          "shareSettings": {},
+          "visibility": "INHERITED",
+          "moduleId": 8885611,
+          "preProcessors": [
+            {
+              "id": "inheritProcessors",
+              "type": "inheritProcessors",
+              "data": {}
+            }
+          ],
+          "postProcessors": [
+            {
+              "id": "inheritProcessors",
+              "type": "inheritProcessors",
+              "data": {}
+            }
+          ],
+          "inheritPostProcessors": {},
+          "inheritPreProcessors": {},
+          "items": [
+            {
+              "name": "获取用户列表",
+              "api": {
+                "id": "540000000",
+                "method": "get",
+                "path": "/user/page",
+                "parameters": {
+                  "header": [],
+                  "query": [
+                    {
+                      "name": "pageNum",
+                      "required": false,
+                      "enable": true,
+                      "description": "当前页码",
+                      "type": "integer",
+                      "schema": {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "当前页码",
+                        "default": 1,
+                        "minimum": 1
+                      }
+                    },
+                    {
+                      "name": "pageSize",
+                      "required": false,
+                      "enable": true,
+                      "description": "每页大小",
+                      "type": "integer",
+                      "schema": {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "每页大小",
+                        "default": 20,
+                        "minimum": 1
+                      }
+                    },
+                    {
+                      "name": "username",
+                      "required": false,
+                      "enable": true,
+                      "description": "用户名",
+                      "type": "string",
+                      "schema": {
+                        "type": "string",
+                        "description": "用户名"
+                      }
+                    },
+                    {
+                      "name": "nickname",
+                      "required": false,
+                      "enable": true,
+                      "description": "昵称",
+                      "type": "string",
+                      "schema": {
+                        "type": "string",
+                        "description": "昵称"
+                      }
+                    },
+                    {
+                      "name": "status",
+                      "required": false,
+                      "enable": true,
+                      "description": "状态",
+                      "type": "string",
+                      "schema": {
+                        "description": "状态",
+                        "$ref": "#/definitions/332526017"
+                      }
+                    }
+                  ]
+                },
+                "auth": {},
+                "securityScheme": {},
+                "commonParameters": {
+                  "query": [],
+                  "body": [],
+                  "cookie": [],
+                  "header": [
+                    {
+                      "name": "Authorization"
+                    }
+                  ]
+                },
+                "responses": [
+                  {
+                    "id": "170000000",
+                    "code": 200,
+                    "name": "成功",
+                    "headers": [],
+                    "jsonSchema": {
+                      "$ref": "#/definitions/332526012"
+                    },
+                    "itemSchema": {},
+                    "description": "",
+                    "contentType": "json",
+                    "mediaType": ""
+                  }
+                ],
+                "responseExamples": [],
+                "requestBody": {
+                  "type": "none",
+                  "parameters": [],
+                  "required": false,
+                  "mediaType": "",
+                  "examples": [],
+                  "oasExtensions": ""
+                },
+                "description": "Query 参数分页查询，不是 JSON Body",
+                "tags": [],
+                "status": "released",
+                "serverId": "",
+                "operationId": "",
+                "sourceUrl": "",
+                "ordering": 10,
+                "cases": [],
+                "mocks": [],
+                "customApiFields": "{}",
+                "advancedSettings": {
+                  "disabledSystemHeaders": {}
+                },
+                "mockScript": {},
+                "codeSamples": [],
+                "commonResponseStatus": {},
+                "responseChildren": [],
+                "visibility": "INHERITED",
+                "moduleId": 8885611,
+                "oasExtensions": "",
+                "type": "http",
+                "preProcessors": [],
+                "postProcessors": [],
+                "inheritPostProcessors": {},
+                "inheritPreProcessors": {}
+              }
+            }
+          ]
+        },
+        {
+          "name": "API资源管理",
+          "id": 99629001,
+          "auth": {},
+          "securityScheme": {},
+          "parentId": 0,
+          "serverId": "",
+          "description": "",
+          "identityPattern": {
+            "httpApi": {
+              "type": "inherit",
+              "bodyType": "",
+              "fields": []
+            }
+          },
+          "shareSettings": {},
+          "visibility": "INHERITED",
+          "moduleId": 8885611,
+          "preProcessors": [
+            {
+              "id": "inheritProcessors",
+              "type": "inheritProcessors",
+              "data": {}
+            }
+          ],
+          "postProcessors": [
+            {
+              "id": "inheritProcessors",
+              "type": "inheritProcessors",
+              "data": {}
+            }
+          ],
+          "inheritPostProcessors": {},
+          "inheritPreProcessors": {},
+          "items": [
+            {
+              "name": "扫描并比对接口差异（只读，不写库）",
+              "api": {
+                "id": "540000001",
+                "method": "post",
+                "path": "/api-resource/scan-diff",
+                "parameters": {
+                  "header": []
+                },
+                "auth": {},
+                "securityScheme": {},
+                "commonParameters": {
+                  "query": [],
+                  "body": [],
+                  "cookie": [],
+                  "header": [
+                    {
+                      "name": "Authorization"
+                    }
+                  ]
+                },
+                "responses": [
+                  {
+                    "id": "170000001",
+                    "code": 200,
+                    "name": "成功",
+                    "headers": [],
+                    "jsonSchema": {
+                      "$ref": "#/definitions/332526003"
+                    },
+                    "itemSchema": {},
+                    "description": "",
+                    "contentType": "json",
+                    "mediaType": ""
+                  }
+                ],
+                "responseExamples": [],
+                "requestBody": {
+                  "type": "none",
+                  "parameters": [],
+                  "required": false,
+                  "mediaType": "",
+                  "examples": [],
+                  "oasExtensions": ""
+                },
+                "description": "扫描容器路由并与表比对，不写库",
+                "tags": [],
+                "status": "released",
+                "serverId": "",
+                "operationId": "",
+                "sourceUrl": "",
+                "ordering": 20,
+                "cases": [],
+                "mocks": [],
+                "customApiFields": "{}",
+                "advancedSettings": {
+                  "disabledSystemHeaders": {}
+                },
+                "mockScript": {},
+                "codeSamples": [],
+                "commonResponseStatus": {},
+                "responseChildren": [],
+                "visibility": "INHERITED",
+                "moduleId": 8885611,
+                "oasExtensions": "",
+                "type": "http",
+                "preProcessors": [],
+                "postProcessors": [],
+                "inheritPostProcessors": {},
+                "inheritPreProcessors": {}
+              }
+            },
+            {
+              "name": "应用已确认的接口差异",
+              "api": {
+                "id": "540000002",
+                "method": "post",
+                "path": "/api-resource/apply",
+                "parameters": {
+                  "header": []
+                },
+                "auth": {},
+                "securityScheme": {},
+                "commonParameters": {
+                  "query": [],
+                  "body": [],
+                  "cookie": [],
+                  "header": [
+                    {
+                      "name": "Authorization"
+                    }
+                  ]
+                },
+                "responses": [
+                  {
+                    "id": "170000002",
+                    "code": 200,
+                    "name": "成功",
+                    "headers": [],
+                    "jsonSchema": {
+                      "$ref": "#/definitions/332526000"
+                    },
+                    "itemSchema": {},
+                    "description": "",
+                    "contentType": "json",
+                    "mediaType": ""
+                  }
+                ],
+                "responseExamples": [],
+                "requestBody": {
+                  "type": "application/json",
+                  "parameters": [],
+                  "jsonSchema": {
+                    "$ref": "#/definitions/332526009"
+                  },
+                  "required": true,
+                  "mediaType": "",
+                  "examples": [
+                    {
+                      "mediaType": "application/json",
+                      "value": "{\n  \"inserts\": [],\n  \"updates\": [],\n  \"removeIds\": []\n}",
+                      "name": "示例"
+                    }
+                  ],
+                  "oasExtensions": ""
+                },
+                "description": "唯一写入口。skipped 大于 0 时需要重新扫描",
+                "tags": [],
+                "status": "released",
+                "serverId": "",
+                "operationId": "",
+                "sourceUrl": "",
+                "ordering": 30,
+                "cases": [],
+                "mocks": [],
+                "customApiFields": "{}",
+                "advancedSettings": {
+                  "disabledSystemHeaders": {}
+                },
+                "mockScript": {},
+                "codeSamples": [],
+                "commonResponseStatus": {},
+                "responseChildren": [],
+                "visibility": "INHERITED",
+                "moduleId": 8885611,
+                "oasExtensions": "",
+                "type": "http",
+                "preProcessors": [],
+                "postProcessors": [],
+                "inheritPostProcessors": {},
+                "inheritPreProcessors": {}
+              }
+            },
+            {
+              "name": "查询接口资源列表",
+              "api": {
+                "id": "540000003",
+                "method": "get",
+                "path": "/api-resource/list",
+                "parameters": {
+                  "header": []
+                },
+                "auth": {},
+                "securityScheme": {},
+                "commonParameters": {
+                  "query": [],
+                  "body": [],
+                  "cookie": [],
+                  "header": [
+                    {
+                      "name": "Authorization"
+                    }
+                  ]
+                },
+                "responses": [
+                  {
+                    "id": "170000003",
+                    "code": 200,
+                    "name": "成功",
+                    "headers": [],
+                    "jsonSchema": {
+                      "$ref": "#/definitions/332526006"
+                    },
+                    "itemSchema": {},
+                    "description": "",
+                    "contentType": "json",
+                    "mediaType": ""
+                  }
+                ],
+                "responseExamples": [],
+                "requestBody": {
+                  "type": "none",
+                  "parameters": [],
+                  "required": false,
+                  "mediaType": "",
+                  "examples": [],
+                  "oasExtensions": ""
+                },
+                "description": "查询当前表内接口清单",
+                "tags": [],
+                "status": "released",
+                "serverId": "",
+                "operationId": "",
+                "sourceUrl": "",
+                "ordering": 40,
+                "cases": [],
+                "mocks": [],
+                "customApiFields": "{}",
+                "advancedSettings": {
+                  "disabledSystemHeaders": {}
+                },
+                "mockScript": {},
+                "codeSamples": [],
+                "commonResponseStatus": {},
+                "responseChildren": [],
+                "visibility": "INHERITED",
+                "moduleId": 8885611,
+                "oasExtensions": "",
+                "type": "http",
+                "preProcessors": [],
+                "postProcessors": [],
+                "inheritPostProcessors": {},
+                "inheritPreProcessors": {}
+              }
+            }
+          ]
+        },
+        {
+          "name": "登录注册",
+          "id": 99629002,
+          "auth": {},
+          "securityScheme": {},
+          "parentId": 0,
+          "serverId": "",
+          "description": "",
+          "identityPattern": {
+            "httpApi": {
+              "type": "inherit",
+              "bodyType": "",
+              "fields": []
+            }
+          },
+          "shareSettings": {},
+          "visibility": "INHERITED",
+          "moduleId": 8885611,
+          "preProcessors": [
+            {
+              "id": "inheritProcessors",
+              "type": "inheritProcessors",
+              "data": {}
+            }
+          ],
+          "postProcessors": [
+            {
+              "id": "inheritProcessors",
+              "type": "inheritProcessors",
+              "data": {}
+            }
+          ],
+          "inheritPostProcessors": {},
+          "inheritPreProcessors": {},
+          "items": [
+            {
+              "name": "用户登录",
+              "api": {
+                "id": "540000004",
+                "method": "post",
+                "path": "/auth/login",
+                "parameters": {
+                  "header": []
+                },
+                "auth": {},
+                "securityScheme": {},
+                "commonParameters": {
+                  "query": [],
+                  "body": [],
+                  "cookie": [],
+                  "header": []
+                },
+                "responses": [
+                  {
+                    "id": "170000004",
+                    "code": 200,
+                    "name": "成功",
+                    "headers": [],
+                    "jsonSchema": {
+                      "$ref": "#/definitions/332526019"
+                    },
+                    "itemSchema": {},
+                    "description": "",
+                    "contentType": "json",
+                    "mediaType": ""
+                  }
+                ],
+                "responseExamples": [],
+                "requestBody": {
+                  "type": "application/json",
+                  "parameters": [],
+                  "jsonSchema": {
+                    "$ref": "#/definitions/332526022"
+                  },
+                  "required": true,
+                  "mediaType": "",
+                  "examples": [
+                    {
+                      "mediaType": "application/json",
+                      "value": "{\n  \"username\": \"ghost\",\n  \"password\": \"password\"\n}",
+                      "name": "示例"
+                    }
+                  ],
+                  "oasExtensions": ""
+                },
+                "description": "匿名可访问。成功返回 access token 与 refresh token",
+                "tags": [],
+                "status": "released",
+                "serverId": "",
+                "operationId": "",
+                "sourceUrl": "",
+                "ordering": 50,
+                "cases": [],
+                "mocks": [],
+                "customApiFields": "{}",
+                "advancedSettings": {
+                  "disabledSystemHeaders": {}
+                },
+                "mockScript": {},
+                "codeSamples": [],
+                "commonResponseStatus": {},
+                "responseChildren": [],
+                "visibility": "INHERITED",
+                "moduleId": 8885611,
+                "oasExtensions": "",
+                "type": "http",
+                "preProcessors": [],
+                "postProcessors": [],
+                "inheritPostProcessors": {},
+                "inheritPreProcessors": {}
+              }
+            },
+            {
+              "name": "用户注册",
+              "api": {
+                "id": "540000005",
+                "method": "post",
+                "path": "/auth/register",
+                "parameters": {
+                  "header": []
+                },
+                "auth": {},
+                "securityScheme": {},
+                "commonParameters": {
+                  "query": [],
+                  "body": [],
+                  "cookie": [],
+                  "header": []
+                },
+                "responses": [
+                  {
+                    "id": "170000005",
+                    "code": 200,
+                    "name": "成功",
+                    "headers": [],
+                    "jsonSchema": {
+                      "$ref": "#/definitions/332526019"
+                    },
+                    "itemSchema": {},
+                    "description": "",
+                    "contentType": "json",
+                    "mediaType": ""
+                  }
+                ],
+                "responseExamples": [],
+                "requestBody": {
+                  "type": "application/json",
+                  "parameters": [],
+                  "jsonSchema": {
+                    "$ref": "#/definitions/332526024"
+                  },
+                  "required": true,
+                  "mediaType": "",
+                  "examples": [
+                    {
+                      "mediaType": "application/json",
+                      "value": "{\n  \"nickname\": \"ghost\",\n  \"username\": \"ghost01\",\n  \"password\": \"password\"\n}",
+                      "name": "示例"
+                    }
+                  ],
+                  "oasExtensions": ""
+                },
+                "description": "匿名可访问。公开注册角色固定为 USER，成功后返回登录数据",
+                "tags": [],
+                "status": "released",
+                "serverId": "",
+                "operationId": "",
+                "sourceUrl": "",
+                "ordering": 60,
+                "cases": [],
+                "mocks": [],
+                "customApiFields": "{}",
+                "advancedSettings": {
+                  "disabledSystemHeaders": {}
+                },
+                "mockScript": {},
+                "codeSamples": [],
+                "commonResponseStatus": {},
+                "responseChildren": [],
+                "visibility": "INHERITED",
+                "moduleId": 8885611,
+                "oasExtensions": "",
+                "type": "http",
+                "preProcessors": [],
+                "postProcessors": [],
+                "inheritPostProcessors": {},
+                "inheritPreProcessors": {}
+              }
+            },
+            {
+              "name": "用户登出",
+              "api": {
+                "id": "540000006",
+                "method": "post",
+                "path": "/auth/logout",
+                "parameters": {
+                  "header": []
+                },
+                "auth": {},
+                "securityScheme": {},
+                "commonParameters": {
+                  "query": [],
+                  "body": [],
+                  "cookie": [],
+                  "header": [
+                    {
+                      "name": "Authorization"
+                    }
+                  ]
+                },
+                "responses": [
+                  {
+                    "id": "170000006",
+                    "code": 200,
+                    "name": "成功",
+                    "headers": [],
+                    "jsonSchema": {
+                      "$ref": "#/definitions/332526020"
+                    },
+                    "itemSchema": {},
+                    "description": "",
+                    "contentType": "json",
+                    "mediaType": ""
+                  }
+                ],
+                "responseExamples": [],
+                "requestBody": {
+                  "type": "none",
+                  "parameters": [],
+                  "required": false,
+                  "mediaType": "",
+                  "examples": [],
+                  "oasExtensions": ""
+                },
+                "description": "只确认登录态。成功时 data 为 null，不吊销已签发的 token",
+                "tags": [],
+                "status": "released",
+                "serverId": "",
+                "operationId": "",
+                "sourceUrl": "",
+                "ordering": 70,
+                "cases": [],
+                "mocks": [],
+                "customApiFields": "{}",
+                "advancedSettings": {
+                  "disabledSystemHeaders": {}
+                },
+                "mockScript": {},
+                "codeSamples": [],
+                "commonResponseStatus": {},
+                "responseChildren": [],
+                "visibility": "INHERITED",
+                "moduleId": 8885611,
+                "oasExtensions": "",
+                "type": "http",
+                "preProcessors": [],
+                "postProcessors": [],
+                "inheritPostProcessors": {},
+                "inheritPreProcessors": {}
+              }
+            },
+            {
+              "name": "用户token刷新",
+              "api": {
+                "id": "540000007",
+                "method": "post",
+                "path": "/auth/refresh",
+                "parameters": {
+                  "header": []
+                },
+                "auth": {},
+                "securityScheme": {},
+                "commonParameters": {
+                  "query": [],
+                  "body": [],
+                  "cookie": [],
+                  "header": []
+                },
+                "responses": [
+                  {
+                    "id": "170000007",
+                    "code": 200,
+                    "name": "成功",
+                    "headers": [],
+                    "jsonSchema": {
+                      "$ref": "#/definitions/332526019"
+                    },
+                    "itemSchema": {},
+                    "description": "",
+                    "contentType": "json",
+                    "mediaType": ""
+                  }
+                ],
+                "responseExamples": [],
+                "requestBody": {
+                  "type": "application/json",
+                  "parameters": [],
+                  "jsonSchema": {
+                    "$ref": "#/definitions/332526023"
+                  },
+                  "required": true,
+                  "mediaType": "",
+                  "examples": [
+                    {
+                      "mediaType": "application/json",
+                      "value": "{\n  \"refreshToken\": \"<refresh-token>\"\n}",
+                      "name": "示例"
+                    }
+                  ],
+                  "oasExtensions": ""
+                },
+                "description": "匿名可访问。只接受 refresh token，换新的 access token",
+                "tags": [],
+                "status": "released",
+                "serverId": "",
+                "operationId": "",
+                "sourceUrl": "",
+                "ordering": 80,
+                "cases": [],
+                "mocks": [],
+                "customApiFields": "{}",
+                "advancedSettings": {
+                  "disabledSystemHeaders": {}
+                },
+                "mockScript": {},
+                "codeSamples": [],
+                "commonResponseStatus": {},
+                "responseChildren": [],
+                "visibility": "INHERITED",
+                "moduleId": 8885611,
+                "oasExtensions": "",
+                "type": "http",
+                "preProcessors": [],
+                "postProcessors": [],
+                "inheritPostProcessors": {},
+                "inheritPreProcessors": {}
+              }
+            },
+            {
+              "name": "获取当前用户信息",
+              "api": {
+                "id": "540000008",
+                "method": "get",
+                "path": "/auth/me",
+                "parameters": {
+                  "header": []
+                },
+                "auth": {},
+                "securityScheme": {},
+                "commonParameters": {
+                  "query": [],
+                  "body": [],
+                  "cookie": [],
+                  "header": [
+                    {
+                      "name": "Authorization"
+                    }
+                  ]
+                },
+                "responses": [
+                  {
+                    "id": "170000008",
+                    "code": 200,
+                    "name": "成功",
+                    "headers": [],
+                    "jsonSchema": {
+                      "$ref": "#/definitions/332526019"
+                    },
+                    "itemSchema": {},
+                    "description": "",
+                    "contentType": "json",
+                    "mediaType": ""
+                  }
+                ],
+                "responseExamples": [],
+                "requestBody": {
+                  "type": "none",
+                  "parameters": [],
+                  "required": false,
+                  "mediaType": "",
+                  "examples": [],
+                  "oasExtensions": ""
+                },
+                "description": "返回当前登录用户。token 字段可能为空",
+                "tags": [],
+                "status": "released",
+                "serverId": "",
+                "operationId": "",
+                "sourceUrl": "",
+                "ordering": 90,
+                "cases": [],
+                "mocks": [],
+                "customApiFields": "{}",
+                "advancedSettings": {
+                  "disabledSystemHeaders": {}
+                },
+                "mockScript": {},
+                "codeSamples": [],
+                "commonResponseStatus": {},
+                "responseChildren": [],
+                "visibility": "INHERITED",
+                "moduleId": 8885611,
+                "oasExtensions": "",
+                "type": "http",
+                "preProcessors": [],
+                "postProcessors": [],
+                "inheritPostProcessors": {},
+                "inheritPreProcessors": {}
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "socketCollection": [],
+  "docCollection": [],
+  "webSocketCollection": [],
+  "socketIOCollection": [],
+  "mcpClientCollection": [],
+  "responseCollection": [],
+  "schemaCollection": [
+    {
+      "id": 21875769,
+      "name": "根目录",
+      "visibility": "SHARED",
+      "moduleId": 8885611,
+      "items": [
+        {
+          "id": 22049000,
+          "name": "API资源管理模块",
+          "visibility": "INHERITED",
+          "moduleId": 8885611,
+          "items": [
+            {
+              "id": 22049001,
+              "name": "请求体",
+              "visibility": "INHERITED",
+              "moduleId": 8885611,
+              "items": [
+                {
+                  "name": "ApiResource",
+                  "displayName": "ApiResource",
+                  "id": "#/definitions/332526008",
+                  "description": "接口资源。path 是路径 pattern。含 BaseEntity 公共字段。申请接口时作为 inserts、updates 的元素，列表接口也会返回它。",
+                  "schema": {
+                    "jsonSchema": {
+                      "$schema": "http://json-schema.org/draft-07/schema#",
+                      "title": "ApiResource",
+                      "description": "接口资源。path 是路径 pattern。含 BaseEntity 公共字段。申请接口时作为 inserts、updates 的元素，列表接口也会返回它。",
+                      "type": "object",
+                      "x-apifox-folder": "API资源管理模块/请求体",
+                      "properties": {
+                        "id": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "主键。新增项可不传，更新项必须带 id"
+                        },
+                        "path": {
+                          "type": "string",
+                          "description": "路径 pattern"
+                        },
+                        "method": {
+                          "type": "string",
+                          "description": "HTTP 方法，空串表示不限"
+                        },
+                        "module": {
+                          "type": "string",
+                          "description": "模块，取控制器 @Tag.name"
+                        },
+                        "summary": {
+                          "type": "string",
+                          "description": "简要描述，取方法 @Operation.summary"
+                        },
+                        "handler": {
+                          "type": "string",
+                          "description": "处理类"
+                        },
+                        "status": {
+                          "description": "状态",
+                          "$ref": "#/definitions/332526010"
+                        },
+                        "createdDate": {
+                          "type": "string",
+                          "format": "date-time",
+                          "description": "创建时间"
+                        },
+                        "createdBy": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "创建人"
+                        },
+                        "updatedDate": {
+                          "type": "string",
+                          "format": "date-time",
+                          "description": "修改时间"
+                        },
+                        "updatedBy": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "修改人"
+                        },
+                        "deleted": {
+                          "description": "删除状态",
+                          "$ref": "#/definitions/332526011"
+                        },
+                        "remark": {
+                          "type": "string",
+                          "description": "备注，人工维护，扫描比对不覆盖"
+                        }
+                      }
+                    }
+                  },
+                  "visibility": "INHERITED",
+                  "moduleId": 8885611
+                },
+                {
+                  "name": "ApiResourceApplyDTO",
+                  "displayName": "ApiResourceApplyDTO",
+                  "id": "#/definitions/332526009",
+                  "description": "应用已确认的接口差异。POST /ghost/api-resource/apply 的请求体。",
+                  "schema": {
+                    "jsonSchema": {
+                      "$schema": "http://json-schema.org/draft-07/schema#",
+                      "title": "ApiResourceApplyDTO",
+                      "description": "应用已确认的接口差异。POST /ghost/api-resource/apply 的请求体。",
+                      "type": "object",
+                      "x-apifox-folder": "API资源管理模块/请求体",
+                      "properties": {
+                        "inserts": {
+                          "type": "array",
+                          "description": "确认新增的接口，来自 diff.added",
+                          "items": {
+                            "$ref": "#/definitions/332526008"
+                          }
+                        },
+                        "updates": {
+                          "type": "array",
+                          "description": "确认更新的接口，必须带 id，来自 diff.modified",
+                          "items": {
+                            "$ref": "#/definitions/332526008"
+                          }
+                        },
+                        "removeIds": {
+                          "type": "array",
+                          "description": "确认标记为代码中已移除的主键。只把 status 置为 REMOVED",
+                          "items": {
+                            "type": "integer",
+                            "format": "int64"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "visibility": "INHERITED",
+                  "moduleId": 8885611
+                },
+                {
+                  "name": "ApiResourceStatus",
+                  "displayName": "ApiResourceStatus",
+                  "id": "#/definitions/332526010",
+                  "description": "接口资源状态。JSON 为枚举名。EXISTS 代码中存在（库值 1），REMOVED 代码中已移除（库值 0）。",
+                  "schema": {
+                    "jsonSchema": {
+                      "$schema": "http://json-schema.org/draft-07/schema#",
+                      "title": "ApiResourceStatus",
+                      "description": "接口资源状态。JSON 为枚举名。EXISTS 代码中存在（库值 1），REMOVED 代码中已移除（库值 0）。",
+                      "type": "string",
+                      "x-apifox-folder": "API资源管理模块/请求体",
+                      "enum": [
+                        "EXISTS",
+                        "REMOVED"
+                      ]
+                    }
+                  },
+                  "visibility": "INHERITED",
+                  "moduleId": 8885611
+                },
+                {
+                  "name": "DeleteFlag",
+                  "displayName": "DeleteFlag",
+                  "id": "#/definitions/332526011",
+                  "description": "逻辑删除标记。JSON 为枚举名。NOT_DELETED 未删除（库值 0），DELETED 已删除（库值 1）。",
+                  "schema": {
+                    "jsonSchema": {
+                      "$schema": "http://json-schema.org/draft-07/schema#",
+                      "title": "DeleteFlag",
+                      "description": "逻辑删除标记。JSON 为枚举名。NOT_DELETED 未删除（库值 0），DELETED 已删除（库值 1）。",
+                      "type": "string",
+                      "x-apifox-folder": "API资源管理模块/请求体",
+                      "enum": [
+                        "NOT_DELETED",
+                        "DELETED"
+                      ]
+                    }
+                  },
+                  "visibility": "INHERITED",
+                  "moduleId": 8885611
+                }
+              ]
+            },
+            {
+              "id": 22049002,
+              "name": "响应体",
+              "visibility": "INHERITED",
+              "moduleId": 8885611,
+              "items": [
+                {
+                  "name": "ApiResourceApplyResponse",
+                  "displayName": "ApiResourceApplyResponse",
+                  "id": "#/definitions/332526000",
+                  "description": "Response<ApiResourceApplyResultVO>。POST /ghost/api-resource/apply。",
+                  "schema": {
+                    "jsonSchema": {
+                      "$schema": "http://json-schema.org/draft-07/schema#",
+                      "title": "ApiResourceApplyResponse",
+                      "description": "Response<ApiResourceApplyResultVO>。POST /ghost/api-resource/apply。",
+                      "type": "object",
+                      "x-apifox-folder": "API资源管理模块/响应体",
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "properties": {
+                        "code": {
+                          "type": "integer",
+                          "description": "响应码",
+                          "example": 200
+                        },
+                        "message": {
+                          "type": "string",
+                          "description": "响应信息",
+                          "example": "运行成功"
+                        },
+                        "data": {
+                          "$ref": "#/definitions/332526001"
+                        }
+                      }
+                    }
+                  },
+                  "visibility": "INHERITED",
+                  "moduleId": 8885611
+                },
+                {
+                  "name": "ApiResourceApplyResultVO",
+                  "displayName": "ApiResourceApplyResultVO",
+                  "id": "#/definitions/332526001",
+                  "description": "应用结果。skipped 大于 0 表示需要重新扫描。",
+                  "schema": {
+                    "jsonSchema": {
+                      "$schema": "http://json-schema.org/draft-07/schema#",
+                      "title": "ApiResourceApplyResultVO",
+                      "description": "应用结果。skipped 大于 0 表示需要重新扫描。",
+                      "type": "object",
+                      "x-apifox-folder": "API资源管理模块/响应体",
+                      "properties": {
+                        "inserted": {
+                          "type": "integer",
+                          "description": "成功新增的接口数"
+                        },
+                        "updated": {
+                          "type": "integer",
+                          "description": "成功更新的接口数"
+                        },
+                        "removed": {
+                          "type": "integer",
+                          "description": "成功标记为代码中已移除的接口数"
+                        },
+                        "skipped": {
+                          "type": "integer",
+                          "description": "跳过的条数：新增时库里已存在，或更新时 id 已不存在"
+                        }
+                      }
+                    }
+                  },
+                  "visibility": "INHERITED",
+                  "moduleId": 8885611
+                },
+                {
+                  "name": "ApiResourceDiffItemVO",
+                  "displayName": "ApiResourceDiffItemVO",
+                  "id": "#/definitions/332526002",
+                  "description": "单条接口差异。ADDED 时 id 与 dbStatus 为 null。",
+                  "schema": {
+                    "jsonSchema": {
+                      "$schema": "http://json-schema.org/draft-07/schema#",
+                      "title": "ApiResourceDiffItemVO",
+                      "description": "单条接口差异。ADDED 时 id 与 dbStatus 为 null。",
+                      "type": "object",
+                      "x-apifox-folder": "API资源管理模块/响应体",
+                      "properties": {
+                        "diffType": {
+                          "description": "差异类型",
+                          "$ref": "#/definitions/332526004"
+                        },
+                        "id": {
+                          "type": [
+                            "integer",
+                            "null"
+                          ],
+                          "format": "int64",
+                          "description": "表中已有记录的主键；ADDED 时为 null"
+                        },
+                        "path": {
+                          "type": "string",
+                          "description": "接口路径 pattern"
+                        },
+                        "method": {
+                          "type": "string",
+                          "description": "HTTP 方法，空串表示不限"
+                        },
+                        "module": {
+                          "type": "string",
+                          "description": "所属模块（取新值）"
+                        },
+                        "summary": {
+                          "type": "string",
+                          "description": "接口说明（取新值）"
+                        },
+                        "handler": {
+                          "type": "string",
+                          "description": "处理方法（取新值）"
+                        },
+                        "dbStatus": {
+                          "description": "表中现有状态；ADDED 时为 null。EXISTS 代码中存在，REMOVED 代码中已移除。",
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "enum": [
+                            "EXISTS",
+                            "REMOVED",
+                            null
+                          ]
+                        },
+                        "changes": {
+                          "type": "array",
+                          "description": "字段级变更明细；仅 MODIFIED 有值",
+                          "items": {
+                            "$ref": "#/definitions/332526007"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "visibility": "INHERITED",
+                  "moduleId": 8885611
+                },
+                {
+                  "name": "ApiResourceDiffResponse",
+                  "displayName": "ApiResourceDiffResponse",
+                  "id": "#/definitions/332526003",
+                  "description": "Response<ApiResourceDiffVO>。POST /ghost/api-resource/scan-diff。",
+                  "schema": {
+                    "jsonSchema": {
+                      "$schema": "http://json-schema.org/draft-07/schema#",
+                      "title": "ApiResourceDiffResponse",
+                      "description": "Response<ApiResourceDiffVO>。POST /ghost/api-resource/scan-diff。",
+                      "type": "object",
+                      "x-apifox-folder": "API资源管理模块/响应体",
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "properties": {
+                        "code": {
+                          "type": "integer",
+                          "description": "响应码",
+                          "example": 200
+                        },
+                        "message": {
+                          "type": "string",
+                          "description": "响应信息",
+                          "example": "运行成功"
+                        },
+                        "data": {
+                          "$ref": "#/definitions/332526005"
+                        }
+                      }
+                    }
+                  },
+                  "visibility": "INHERITED",
+                  "moduleId": 8885611
+                },
+                {
+                  "name": "ApiResourceDiffType",
+                  "displayName": "ApiResourceDiffType",
+                  "id": "#/definitions/332526004",
+                  "description": "差异类型。JSON 为枚举名。ADDED 新增，MODIFIED 修改，REMOVED 删除。",
+                  "schema": {
+                    "jsonSchema": {
+                      "$schema": "http://json-schema.org/draft-07/schema#",
+                      "title": "ApiResourceDiffType",
+                      "description": "差异类型。JSON 为枚举名。ADDED 新增，MODIFIED 修改，REMOVED 删除。",
+                      "type": "string",
+                      "x-apifox-folder": "API资源管理模块/响应体",
+                      "enum": [
+                        "ADDED",
+                        "MODIFIED",
+                        "REMOVED"
+                      ]
+                    }
+                  },
+                  "visibility": "INHERITED",
+                  "moduleId": 8885611
+                },
+                {
+                  "name": "ApiResourceDiffVO",
+                  "displayName": "ApiResourceDiffVO",
+                  "id": "#/definitions/332526005",
+                  "description": "扫描差异。POST /ghost/api-resource/scan-diff 的 data。",
+                  "schema": {
+                    "jsonSchema": {
+                      "$schema": "http://json-schema.org/draft-07/schema#",
+                      "title": "ApiResourceDiffVO",
+                      "description": "扫描差异。POST /ghost/api-resource/scan-diff 的 data。",
+                      "type": "object",
+                      "x-apifox-folder": "API资源管理模块/响应体",
+                      "properties": {
+                        "scanTime": {
+                          "type": "string",
+                          "format": "date-time",
+                          "description": "扫描时间"
+                        },
+                        "scannedCount": {
+                          "type": "integer",
+                          "description": "容器路由总数"
+                        },
+                        "dbCount": {
+                          "type": "integer",
+                          "description": "表中记录总数（未逻辑删除）"
+                        },
+                        "added": {
+                          "type": "array",
+                          "description": "新增：容器有、表里没有",
+                          "items": {
+                            "$ref": "#/definitions/332526002"
+                          }
+                        },
+                        "modified": {
+                          "type": "array",
+                          "description": "修改：两边都有但元信息不同",
+                          "items": {
+                            "$ref": "#/definitions/332526002"
+                          }
+                        },
+                        "removed": {
+                          "type": "array",
+                          "description": "删除：表里有、容器已无",
+                          "items": {
+                            "$ref": "#/definitions/332526002"
+                          }
+                        },
+                        "unchangedCount": {
+                          "type": "integer",
+                          "description": "完全一致、无需处理的数量",
+                          "default": 0
+                        }
+                      }
+                    }
+                  },
+                  "visibility": "INHERITED",
+                  "moduleId": 8885611
+                },
+                {
+                  "name": "ApiResourceListResponse",
+                  "displayName": "ApiResourceListResponse",
+                  "id": "#/definitions/332526006",
+                  "description": "Response<List<ApiResource>>。GET /ghost/api-resource/list。",
+                  "schema": {
+                    "jsonSchema": {
+                      "$schema": "http://json-schema.org/draft-07/schema#",
+                      "title": "ApiResourceListResponse",
+                      "description": "Response<List<ApiResource>>。GET /ghost/api-resource/list。",
+                      "type": "object",
+                      "x-apifox-folder": "API资源管理模块/响应体",
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "properties": {
+                        "code": {
+                          "type": "integer",
+                          "description": "响应码",
+                          "example": 200
+                        },
+                        "message": {
+                          "type": "string",
+                          "description": "响应信息",
+                          "example": "运行成功"
+                        },
+                        "data": {
+                          "type": "array",
+                          "description": "当前表内接口清单",
+                          "items": {
+                            "$ref": "#/definitions/332526008"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "visibility": "INHERITED",
+                  "moduleId": 8885611
+                },
+                {
+                  "name": "FieldChangeVO",
+                  "displayName": "FieldChangeVO",
+                  "id": "#/definitions/332526007",
+                  "description": "字段变化。仅 MODIFIED 有值。",
+                  "schema": {
+                    "jsonSchema": {
+                      "$schema": "http://json-schema.org/draft-07/schema#",
+                      "title": "FieldChangeVO",
+                      "description": "字段变化。仅 MODIFIED 有值。",
+                      "type": "object",
+                      "x-apifox-folder": "API资源管理模块/响应体",
+                      "properties": {
+                        "field": {
+                          "type": "string",
+                          "description": "字段名",
+                          "enum": [
+                            "module",
+                            "summary",
+                            "handler",
+                            "status"
+                          ]
+                        },
+                        "oldValue": {
+                          "type": "string",
+                          "description": "表中旧值"
+                        },
+                        "newValue": {
+                          "type": "string",
+                          "description": "扫描到的新值"
+                        }
+                      }
+                    }
+                  },
+                  "visibility": "INHERITED",
+                  "moduleId": 8885611
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": 22049003,
+          "name": "登录模块",
+          "visibility": "INHERITED",
+          "moduleId": 8885611,
+          "items": [
+            {
+              "id": 22049004,
+              "name": "请求体",
+              "visibility": "INHERITED",
+              "moduleId": 8885611,
+              "items": [
+                {
+                  "name": "LoginRequestDTO",
+                  "displayName": "LoginRequestDTO",
+                  "id": "#/definitions/332526022",
+                  "description": "登录请求参数。POST /ghost/auth/login",
+                  "schema": {
+                    "jsonSchema": {
+                      "$schema": "http://json-schema.org/draft-07/schema#",
+                      "title": "LoginRequestDTO",
+                      "description": "登录请求参数。POST /ghost/auth/login",
+                      "type": "object",
+                      "x-apifox-folder": "登录模块/请求体",
+                      "required": [
+                        "username",
+                        "password"
+                      ],
+                      "properties": {
+                        "username": {
+                          "type": "string",
+                          "description": "用户名",
+                          "minLength": 1
+                        },
+                        "password": {
+                          "type": "string",
+                          "description": "密码",
+                          "minLength": 1
+                        }
+                      }
+                    }
+                  },
+                  "visibility": "INHERITED",
+                  "moduleId": 8885611
+                },
+                {
+                  "name": "RefreshRequestDTO",
+                  "displayName": "RefreshRequestDTO",
+                  "id": "#/definitions/332526023",
+                  "description": "刷新 token 请求参数。POST /ghost/auth/refresh",
+                  "schema": {
+                    "jsonSchema": {
+                      "$schema": "http://json-schema.org/draft-07/schema#",
+                      "title": "RefreshRequestDTO",
+                      "description": "刷新 token 请求参数。POST /ghost/auth/refresh",
+                      "type": "object",
+                      "x-apifox-folder": "登录模块/请求体",
+                      "required": [
+                        "refreshToken"
+                      ],
+                      "properties": {
+                        "refreshToken": {
+                          "type": "string",
+                          "description": "刷新令牌",
+                          "minLength": 1
+                        }
+                      }
+                    }
+                  },
+                  "visibility": "INHERITED",
+                  "moduleId": 8885611
+                },
+                {
+                  "name": "RegisterRequestDTO",
+                  "displayName": "RegisterRequestDTO",
+                  "id": "#/definitions/332526024",
+                  "description": "注册请求参数。POST /ghost/auth/register。公开注册角色固定为 USER。",
+                  "schema": {
+                    "jsonSchema": {
+                      "$schema": "http://json-schema.org/draft-07/schema#",
+                      "title": "RegisterRequestDTO",
+                      "description": "注册请求参数。POST /ghost/auth/register。公开注册角色固定为 USER。",
+                      "type": "object",
+                      "x-apifox-folder": "登录模块/请求体",
+                      "required": [
+                        "username",
+                        "password",
+                        "nickname"
+                      ],
+                      "properties": {
+                        "username": {
+                          "type": "string",
+                          "description": "用户名，长度 5 到 20",
+                          "minLength": 5,
+                          "maxLength": 20
+                        },
+                        "password": {
+                          "type": "string",
+                          "description": "密码",
+                          "minLength": 1
+                        },
+                        "nickname": {
+                          "type": "string",
+                          "description": "昵称",
+                          "minLength": 1
+                        }
+                      }
+                    }
+                  },
+                  "visibility": "INHERITED",
+                  "moduleId": 8885611
+                }
+              ]
+            },
+            {
+              "id": 22049005,
+              "name": "响应体",
+              "visibility": "INHERITED",
+              "moduleId": 8885611,
+              "items": [
+                {
+                  "name": "LoginRequestVO",
+                  "displayName": "LoginRequestVO",
+                  "id": "#/definitions/332526018",
+                  "description": "登录、注册、当前用户、刷新 token 的 data。GET /me 与刷新结果里 token 字段可能为空。",
+                  "schema": {
+                    "jsonSchema": {
+                      "$schema": "http://json-schema.org/draft-07/schema#",
+                      "title": "LoginRequestVO",
+                      "description": "登录、注册、当前用户、刷新 token 的 data。GET /me 与刷新结果里 token 字段可能为空。",
+                      "type": "object",
+                      "x-apifox-folder": "登录模块/响应体",
+                      "properties": {
+                        "id": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "主键 id"
+                        },
+                        "nickname": {
+                          "type": "string",
+                          "description": "昵称"
+                        },
+                        "username": {
+                          "type": "string",
+                          "description": "用户名"
+                        },
+                        "role": {
+                          "description": "角色",
+                          "$ref": "#/definitions/332526021"
+                        },
+                        "token": {
+                          "type": "string",
+                          "description": "access token"
+                        },
+                        "refreshToken": {
+                          "type": "string",
+                          "description": "刷新令牌"
+                        }
+                      }
+                    }
+                  },
+                  "visibility": "INHERITED",
+                  "moduleId": 8885611
+                },
+                {
+                  "name": "LoginResponse",
+                  "displayName": "LoginResponse",
+                  "id": "#/definitions/332526019",
+                  "description": "Response<LoginRequestVO>。登录、注册、获取当前用户、刷新 token。成功时 code=200，message=运行成功。",
+                  "schema": {
+                    "jsonSchema": {
+                      "$schema": "http://json-schema.org/draft-07/schema#",
+                      "title": "LoginResponse",
+                      "description": "Response<LoginRequestVO>。登录、注册、获取当前用户、刷新 token。成功时 code=200，message=运行成功。",
+                      "type": "object",
+                      "x-apifox-folder": "登录模块/响应体",
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "properties": {
+                        "code": {
+                          "type": "integer",
+                          "description": "响应码",
+                          "example": 200
+                        },
+                        "message": {
+                          "type": "string",
+                          "description": "响应信息",
+                          "example": "运行成功"
+                        },
+                        "data": {
+                          "description": "登录结果",
+                          "$ref": "#/definitions/332526018"
+                        }
+                      }
+                    }
+                  },
+                  "visibility": "INHERITED",
+                  "moduleId": 8885611
+                },
+                {
+                  "name": "LogoutResponse",
+                  "displayName": "LogoutResponse",
+                  "id": "#/definitions/332526020",
+                  "description": "Response<String>。POST /ghost/auth/logout。成功时 data 为 null，不会吊销已签发的 token。",
+                  "schema": {
+                    "jsonSchema": {
+                      "$schema": "http://json-schema.org/draft-07/schema#",
+                      "title": "LogoutResponse",
+                      "description": "Response<String>。POST /ghost/auth/logout。成功时 data 为 null，不会吊销已签发的 token。",
+                      "type": "object",
+                      "x-apifox-folder": "登录模块/响应体",
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "properties": {
+                        "code": {
+                          "type": "integer",
+                          "description": "响应码",
+                          "example": 200
+                        },
+                        "message": {
+                          "type": "string",
+                          "description": "响应信息",
+                          "example": "运行成功"
+                        },
+                        "data": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "description": "响应数据，登出成功时为 null"
+                        }
+                      }
+                    }
+                  },
+                  "visibility": "INHERITED",
+                  "moduleId": 8885611
+                },
+                {
+                  "name": "UserRole",
+                  "displayName": "UserRole",
+                  "id": "#/definitions/332526021",
+                  "description": "用户角色。JSON 为枚举名。USER 普通用户，ADMIN 管理员，SUPER_ADMIN 超级管理员。",
+                  "schema": {
+                    "jsonSchema": {
+                      "$schema": "http://json-schema.org/draft-07/schema#",
+                      "title": "UserRole",
+                      "description": "用户角色。JSON 为枚举名。USER 普通用户，ADMIN 管理员，SUPER_ADMIN 超级管理员。",
+                      "type": "string",
+                      "x-apifox-folder": "登录模块/响应体",
+                      "enum": [
+                        "USER",
+                        "ADMIN",
+                        "SUPER_ADMIN"
+                      ]
+                    }
+                  },
+                  "visibility": "INHERITED",
+                  "moduleId": 8885611
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": 22049006,
+          "name": "用户模块",
+          "visibility": "INHERITED",
+          "moduleId": 8885611,
+          "items": [
+            {
+              "id": 22049007,
+              "name": "请求体",
+              "visibility": "INHERITED",
+              "moduleId": 8885611,
+              "items": [
+                {
+                  "name": "UserPageDTO",
+                  "displayName": "UserPageDTO",
+                  "id": "#/definitions/332526016",
+                  "description": "用户分页查询参数。GET /ghost/user/page，Query 参数，不是 JSON Body。",
+                  "schema": {
+                    "jsonSchema": {
+                      "$schema": "http://json-schema.org/draft-07/schema#",
+                      "title": "UserPageDTO",
+                      "description": "用户分页查询参数。GET /ghost/user/page，Query 参数，不是 JSON Body。",
+                      "type": "object",
+                      "x-apifox-folder": "用户模块/请求体",
+                      "properties": {
+                        "pageNum": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "当前页码",
+                          "default": 1,
+                          "minimum": 1
+                        },
+                        "pageSize": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "每页大小",
+                          "default": 20,
+                          "minimum": 1
+                        },
+                        "username": {
+                          "type": "string",
+                          "description": "用户名"
+                        },
+                        "nickname": {
+                          "type": "string",
+                          "description": "昵称"
+                        },
+                        "status": {
+                          "description": "状态",
+                          "$ref": "#/definitions/332526017"
+                        }
+                      }
+                    }
+                  },
+                  "visibility": "INHERITED",
+                  "moduleId": 8885611
+                },
+                {
+                  "name": "UserStatus",
+                  "displayName": "UserStatus",
+                  "id": "#/definitions/332526017",
+                  "description": "用户状态。JSON 为枚举名。NORMAL 正常（库值 1），LOCKED 禁用（库值 0）。",
+                  "schema": {
+                    "jsonSchema": {
+                      "$schema": "http://json-schema.org/draft-07/schema#",
+                      "title": "UserStatus",
+                      "description": "用户状态。JSON 为枚举名。NORMAL 正常（库值 1），LOCKED 禁用（库值 0）。",
+                      "type": "string",
+                      "x-apifox-folder": "用户模块/请求体",
+                      "enum": [
+                        "NORMAL",
+                        "LOCKED"
+                      ]
+                    }
+                  },
+                  "visibility": "INHERITED",
+                  "moduleId": 8885611
+                }
+              ]
+            },
+            {
+              "id": 22049008,
+              "name": "响应体",
+              "visibility": "INHERITED",
+              "moduleId": 8885611,
+              "items": [
+                {
+                  "name": "UserPageResponse",
+                  "displayName": "UserPageResponse",
+                  "id": "#/definitions/332526012",
+                  "description": "Response<PageResult<UserPageVO>>。GET /ghost/user/page。成功时 code=200，message=运行成功。",
+                  "schema": {
+                    "jsonSchema": {
+                      "$schema": "http://json-schema.org/draft-07/schema#",
+                      "title": "UserPageResponse",
+                      "description": "Response<PageResult<UserPageVO>>。GET /ghost/user/page。成功时 code=200，message=运行成功。",
+                      "type": "object",
+                      "x-apifox-folder": "用户模块/响应体",
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "properties": {
+                        "code": {
+                          "type": "integer",
+                          "description": "响应码",
+                          "example": 200
+                        },
+                        "message": {
+                          "type": "string",
+                          "description": "响应信息",
+                          "example": "运行成功"
+                        },
+                        "data": {
+                          "description": "分页数据",
+                          "$ref": "#/definitions/332526013"
+                        }
+                      }
+                    }
+                  },
+                  "visibility": "INHERITED",
+                  "moduleId": 8885611
+                },
+                {
+                  "name": "UserPageResult",
+                  "displayName": "UserPageResult",
+                  "id": "#/definitions/332526013",
+                  "description": "分页结果 PageResult<UserPageVO>",
+                  "schema": {
+                    "jsonSchema": {
+                      "$schema": "http://json-schema.org/draft-07/schema#",
+                      "title": "UserPageResult",
+                      "description": "分页结果 PageResult<UserPageVO>",
+                      "type": "object",
+                      "x-apifox-folder": "用户模块/响应体",
+                      "properties": {
+                        "current": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "当前页码"
+                        },
+                        "size": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "每页条数"
+                        },
+                        "total": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "总记录数"
+                        },
+                        "pages": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "总页数"
+                        },
+                        "records": {
+                          "type": "array",
+                          "description": "数据列表",
+                          "items": {
+                            "$ref": "#/definitions/332526014"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "visibility": "INHERITED",
+                  "moduleId": 8885611
+                },
+                {
+                  "name": "UserPageVO",
+                  "displayName": "UserPageVO",
+                  "id": "#/definitions/332526014",
+                  "description": "用户分页行",
+                  "schema": {
+                    "jsonSchema": {
+                      "$schema": "http://json-schema.org/draft-07/schema#",
+                      "title": "UserPageVO",
+                      "description": "用户分页行",
+                      "type": "object",
+                      "x-apifox-folder": "用户模块/响应体",
+                      "properties": {
+                        "id": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "id"
+                        },
+                        "nickname": {
+                          "type": "string",
+                          "description": "昵称"
+                        },
+                        "username": {
+                          "type": "string",
+                          "description": "用户名"
+                        },
+                        "role": {
+                          "description": "角色",
+                          "$ref": "#/definitions/332526015"
+                        },
+                        "status": {
+                          "description": "状态。NORMAL 正常（库值 1），LOCKED 禁用（库值 0）。",
+                          "type": "string",
+                          "enum": [
+                            "NORMAL",
+                            "LOCKED"
+                          ]
+                        },
+                        "createdTime": {
+                          "type": "string",
+                          "format": "date-time",
+                          "description": "创建时间，LocalDateTime"
+                        },
+                        "updatedTime": {
+                          "type": "string",
+                          "format": "date-time",
+                          "description": "更新时间，LocalDateTime"
+                        }
+                      }
+                    }
+                  },
+                  "visibility": "INHERITED",
+                  "moduleId": 8885611
+                },
+                {
+                  "name": "UserRole",
+                  "displayName": "UserRole",
+                  "id": "#/definitions/332526015",
+                  "description": "用户角色。JSON 为枚举名。USER 普通用户，ADMIN 管理员，SUPER_ADMIN 超级管理员。",
+                  "schema": {
+                    "jsonSchema": {
+                      "$schema": "http://json-schema.org/draft-07/schema#",
+                      "title": "UserRole",
+                      "description": "用户角色。JSON 为枚举名。USER 普通用户，ADMIN 管理员，SUPER_ADMIN 超级管理员。",
+                      "type": "string",
+                      "x-apifox-folder": "用户模块/响应体",
+                      "enum": [
+                        "USER",
+                        "ADMIN",
+                        "SUPER_ADMIN"
+                      ]
+                    }
+                  },
+                  "visibility": "INHERITED",
+                  "moduleId": 8885611
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "securitySchemeCollection": [],
+  "oasComponentCollection": [],
+  "requestCollection": [],
+  "environments": [
+    {
+      "name": "ghost_frame",
+      "variables": [],
+      "parameters": {
+        "cookie": [],
+        "query": [],
+        "header": [],
+        "body": []
+      },
+      "type": "normal",
+      "visibility": "protected",
+      "id": "50392079",
+      "baseUrl": "http://localhost:10583/ghost",
+      "baseUrls": {
+        "8885611": "http://localhost:10583/ghost"
+      }
+    }
+  ],
+  "commonParameters": {
+    "parameters": {
+      "header": [
+        {
+          "name": "Authorization",
+          "defaultEnable": true,
+          "type": "string",
+          "defaultValue": "Bearer <token>"
+        }
+      ]
+    }
+  },
+  "moduleSettings": [
+    {
+      "id": "8885611",
+      "name": "默认模块",
+      "description": "",
+      "moduleVariables": [],
+      "openApiInfo": {}
+    }
+  ]
+}

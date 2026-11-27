@@ -11,7 +11,11 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * @author 34592
@@ -45,7 +49,7 @@ public class LoginRegisterController extends BaseController {
     return Response.success(userService.obtainTheCurrentUser(userId));
   } 
   
-  @Operation(summary = "用户登出")
+  @Operation(summary = "用户登出", description = "只确认登录态。成功时 data 为 null，不吊销已签发的 token")
   @PostMapping("/logout")
   public Response<String> logout() {
     getUserId();
@@ -54,7 +58,7 @@ public class LoginRegisterController extends BaseController {
   
   @Operation(summary = "用户token刷新")
   @PostMapping("/refresh")
-  public Response<LoginRequestVO> refresh(@Valid @RequestBody RefreshRequestDTO refreshRequestDTO){
+  public Response<LoginRequestVO> refresh(@Valid @RequestBody RefreshRequestDTO refreshRequestDTO) {
     return Response.success(userService.refresh(refreshRequestDTO));
   }
   

@@ -7,29 +7,42 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
+ * 登录、注册、当前用户、刷新 token 的返回数据
  * @author 34592
- * @description 登录请求VO
  */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Schema(description = "登录、注册、当前用户、刷新 token 的返回数据")
 public class LoginRequestVO {
-  //  主键id
+  /**
+   * 主键id
+   */
   @Schema(description = "主键id")
   private Long id;
-  //  昵称
+  /**
+   * 昵称
+   */
   @Schema(description = "昵称")
   private String nickname;
-  //  用户名
+  /**
+   * 用户名
+   */
   @Schema(description = "用户名")
   private String username;
-  //  角色
+  /**
+   * 角色
+   */
   @Schema(description = "角色")
   private UserRole role;
-  //  token令牌
+  /**
+   * token令牌
+   */
   @Schema(description = "token令牌")
   private String token;
-  //  刷新令牌
+  /**
+   * 刷新令牌
+   */
   @Schema(description = "刷新令牌")
   private String refreshToken;
 }

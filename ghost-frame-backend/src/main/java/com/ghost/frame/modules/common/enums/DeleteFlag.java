@@ -1,6 +1,7 @@
 package com.ghost.frame.modules.common.enums;
 
 import com.baomidou.mybatisplus.annotation.EnumValue;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 
 import java.util.Arrays;
@@ -11,6 +12,7 @@ import java.util.Arrays;
  */
 
 @Getter
+@Schema(description = "删除标志。JSON 为枚举名。NOT_DELETED 未删除，DELETED 已删除")
 public enum DeleteFlag {
     DELETED(1, "已删除"),
     NOT_DELETED(0, "未删除");

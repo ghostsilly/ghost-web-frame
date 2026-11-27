@@ -10,7 +10,10 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.*;
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * 用户控制器
@@ -24,9 +27,9 @@ import org.springframework.web.bind.annotation.*;
 public class UserController extends BaseController {
   
   private final UserService userService;
-  @Operation(summary = "获取用户列表")
+  @Operation(summary = "获取用户列表", description = "Query 参数分页查询，不是 JSON Body")
   @GetMapping("/page")
-  public Response<PageResult<UserPageVO>> pageUsers(UserPageDTO dto){
+  public Response<PageResult<UserPageVO>> pageUsers(@ParameterObject UserPageDTO dto) {
     log.info("分页查询用户列表，参数：{}", dto);
     return Response.success(userService.pageUsers(dto));
   }

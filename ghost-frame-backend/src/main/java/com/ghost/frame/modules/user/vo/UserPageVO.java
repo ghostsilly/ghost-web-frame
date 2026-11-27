@@ -8,9 +8,11 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 /**
+ * 用户分页行
  * @author 34592
  */
 @Data
+@Schema(description = "用户分页行")
 public class UserPageVO {
   /**
    * id

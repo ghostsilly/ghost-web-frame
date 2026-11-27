@@ -9,7 +9,7 @@
 | 层 | 选型 | 状态 |
 | --- | --- | --- |
 | 后端 | Java 17 + Spring Boot 3.5.16 + Maven | 已接入 Web / Validation / Security |
-| 前端 | Vue 3 + Vite | 登录 / 注册 / 首页、axios、Pinia、路由守卫已落地 |
+| 前端 | Vue 3 + Vite + Element Plus 2.14 | 登录 / 注册 / 首页、管理后台壳、axios、Pinia、路由守卫已落地 |
 | 数据库 | MySQL + MyBatis-Plus 3.5.9 | 已接入，`user`、`api_resource` 两张表 |
 | 鉴权 | JWT（jjwt 0.12.6）+ Spring Security | 已接入过滤器与登录态；接口只区分是否已登录 |
 | 接口文档 | knife4j 4.5.0 + springdoc-openapi 2.7.0 | 已接入 |
@@ -28,6 +28,8 @@ ghost-web-frame/
 ├── ghost-frame-backend/
 │   ├── pom.xml
 │   ├── mvnw / mvnw.cmd / .mvn/（已入库）
+│   ├── apifox/
+│   │   └── ghost_frame.apifox.json        # 唯一的 Apifox 导入文件，规范见下文
 │   ├── data_table/                        # 表结构脚本（规范见该目录 README.md）
 │   │   ├── README.md
 │   │   ├── schema/
@@ -39,14 +41,14 @@ ghost-web-frame/
 │       ├── main/java/com/ghost/frame/
 │       │   ├── GhostFrameBackendApplication.java   # 无 @MapperScan，靠 @Mapper 自动扫描
 │       │   ├── common/                    # 框架级横切能力
-│       │   │   ├── Response.java
 │       │   │   ├── MyMetaObjectHandler.java
 │       │   │   └── throwable/
 │       │   │       ├── GlobalExceptionHandler.java
 │       │   │       ├── enums/ErrorCode.java
 │       │   │       └── exception/BusinessException.java
 │       │   ├── config/
-│       │   │   └── OpenApiConfig.java     # knife4j / springdoc
+│       │   │   ├── OpenApiConfig.java     # knife4j / springdoc，全局 Bearer
+│       │   │   └── MybatisPlusConfig.java # MySQL 分页插件
 │       │   ├── security/
 │       │   │   ├── SecurityConfig.java    # 过滤链 + CORS + 401 统一体
 │       │   │   ├── JwtAuthenticationFilter.java   # 只接受 access token
@@ -57,14 +59,17 @@ ghost-web-frame/
 │       │       ├── common/                # 模块间共享
 │       │       │   ├── controller/BaseController.java   # getUserId()
 │       │       │   ├── entity/BaseEntity.java           # 公共字段 + deleted + remark
+│       │       │   ├── entity/Response.java             # 统一响应 code / message / data
+│       │       │   ├── entity/PageResult.java           # 分页结果
 │       │       │   └── enums/DeleteFlag.java
 │       │       ├── user/                  # 用户与鉴权
 │       │       │   ├── controller/LoginRegisterController.java
+│       │       │   ├── controller/UserController.java   # GET /user/page
 │       │       │   ├── service/UserService.java (+ impl/UserServiceImpl.java)
 │       │       │   ├── entity/User.java
 │       │       │   ├── mapper/UserMapper.java           # @Mapper
-│       │       │   ├── dto/{LoginRequestDTO, RegisterRequestDTO, RefreshRequestDTO}.java
-│       │       │   ├── vo/LoginRequestVO.java
+│       │       │   ├── dto/{LoginRequestDTO, RegisterRequestDTO, RefreshRequestDTO, UserPageDTO}.java
+│       │       │   ├── vo/{LoginRequestVO, UserPageVO}.java
 │       │       │   └── enums/{UserRole, UserStatus}.java
 │       │       └── api/                   # 接口资源池（阶段 7 第一块）
 │       │           ├── controller/ApiResourceController.java
@@ -76,7 +81,7 @@ ghost-web-frame/
 │       │           │       ApiResourceApplyResultVO, FieldChangeVO}.java
 │       │           └── enums/{ApiResourceStatus, ApiResourceDiffType}.java
 │       ├── main/resources/
-│       │   ├── application.yml            # profile=local、api: /ghost、端口 10583；mapper-locations 仍用点号路径
+│       │   ├── application.yml            # profile=local、api: /ghost、端口 10583
 │       │   ├── application-local.yml      # 本机私有（不入库）
 │       │   ├── application-local.yml.example
 │       │   ├── config/application-knife4j.yml
@@ -87,7 +92,7 @@ ghost-web-frame/
 │           └── modules/UserServiceImplTest.java        # 纯 Mockito，不连库
 └── ghost-frame-frontend/
     ├── package.json / package-lock.json   # vue 3.5 / vite 8 / vue-router 4.6 / pinia 4.1 / axios 1.20
-    ├── vite.config.js                     # 代理 /ghost → localhost:10583，port 5173
+    ├── vite.config.js                     # 代理 /ghost → localhost:10583，port 5187；Element Plus 按需导入
     ├── index.html
     ├── public/favicon.svg、public/icons.svg
     └── src/
@@ -95,9 +100,10 @@ ghost-web-frame/
         ├── api/request.js                 # axios + Bearer + 解包；401 或过期时先刷新再重放
         ├── api/auth.js                    # login / register / getMe / logout
         ├── components/PasswordInput.vue
-        ├── router/index.js                # / /login /register + beforeEach
+        ├── layouts/AdminLayout.vue       # 管理后台顶栏、侧栏、登出
+        ├── router/index.js                # / /login /register /admin + beforeEach
         ├── stores/user.js                 # token 持久化与 login / register / fetchMe / logout
-        └── views/HomeView.vue、views/login/{LoginView, RegisterView}.vue
+        └── views/HomeView.vue、views/login/{LoginView, RegisterView}.vue、views/admin/DashboardView.vue
 ```
 
 access token 键名 `ghost-token`，refresh token 键名 `ghost-refresh-token`，都在 `localStorage`。
@@ -110,15 +116,15 @@ access token 键名 `ghost-token`，refresh token 键名 `ghost-refresh-token`�
 
 ```text
 com.ghost.frame
-├── common/      # 框架级横切：Response、MyMetaObjectHandler、全局异常
+├── common/      # 框架级横切：MyMetaObjectHandler、全局异常
 │   └── throwable/{GlobalExceptionHandler, enums/ErrorCode, exception/BusinessException}
-├── config/      # OpenApiConfig（后续放 WebMvc、Jackson）
+├── config/      # OpenApiConfig、MybatisPlusConfig
 ├── security/    # SecurityConfig、JwtAuthenticationFilter、JwtUtil
 ├── utils/       # 与 Spring 容器协作的工具组件
 └── modules/
     ├── common/  # 跨模块共享的基类与枚举
     │   ├── controller/BaseController    # getUserId() 取当前登录用户
-    │   ├── entity/BaseEntity            # createdDate/By、updatedDate/By、deleted、remark
+    │   ├── entity/{BaseEntity, Response, PageResult}
     │   └── enums/DeleteFlag
     ├── user/    # {controller, service(+impl), entity, mapper, dto, vo, enums}
     └── api/     # {controller, service(+impl), entity, mapper, dto, vo, enums}
@@ -130,8 +136,8 @@ com.ghost.frame
 
 | 包 | 放什么 |
 | --- | --- |
-| `com.ghost.frame.common` | 框架级：统一响应体、异常体系、自动填充 |
-| `com.ghost.frame.modules.common` | 业务级：实体基类、控制器基类、业务枚举 |
+| `com.ghost.frame.common` | 框架级：异常体系、自动填充 |
+| `com.ghost.frame.modules.common` | 业务级：`Response`、`PageResult`、实体基类、控制器基类、业务枚举 |
 
 API 统一前缀：`/ghost/**`，由 `${api}` 配置注入。
 
@@ -162,8 +168,9 @@ API 统一前缀：`/ghost/**`，由 `${api}` 配置注入。
 - `JwtAuthenticationFilter` 只把 `tokenType=access` 的票写入登录态
 - `GET /ghost/auth/me`（经 `BaseController.getUserId()` 取 id，再走 `UserMapper.getUserInformation`）
 - `POST /ghost/auth/logout`（只确认登录态，**不吊销 token**）
-- CORS 放行 `http://localhost:5173`；未登录走 `authenticationEntryPoint` 返回 401 统一体
+- CORS 放行 `http://localhost:5187`；未登录走 `authenticationEntryPoint` 返回 401 统一体
 - knife4j 接口文档（springdoc 强制覆盖到 2.7.0 以兼容 Spring Framework 6.2.x）
+- Apifox 导入文件只维护 `apifox/ghost_frame.apifox.json`，规范见下文
 
 **数据层**
 
@@ -172,6 +179,7 @@ API 统一前缀：`/ghost/**`，由 `${api}` 配置注入。
 - `MyMetaObjectHandler` 自动填充创建/更新的时间与操作人
 - 表结构只由 `data_table/` 手工维护（全量 `schema/`、增量 `migration/`）。不使用 Flyway，启动不自动建表或改表
 - `UserMapper.xml` 已放到 `resources/com/ghost/frame/modules/user/mapper/`，与 Mapper 接口同包
+- `MybatisPlusConfig` 注册 MySQL 分页插件。`GET /ghost/user/page` 用 Query 参数 `UserPageDTO`，返回 `Response<PageResult<UserPageVO>>`
 
 **接口资源池（阶段 7 第一块，2026-11-09）**
 
@@ -201,34 +209,38 @@ API 统一前缀：`/ghost/**`，由 `${api}` 配置注入。
 ### 尚未实现
 
 - 权限模型本体：`permission`（权限点）、`permission_role`（权限角色）、用户与权限角色的关联表，以及接口级校验过滤器
-- 前端接口资源管理页面（三个 `/ghost/api-resource/**` 接口目前无 UI）
+- 前端接口资源管理页面（三个 `/ghost/api-resource/**` 接口目前无 UI）。用户分页接口同样无页面
 - **服务端 token 吊销**：登出不使已签发的票失效，两张票在各自过期前仍可用
-- 前端工程化：无 ESLint / Prettier、无 UI 组件库、无前端单元测试
+- 前端工程化：无 ESLint / Prettier、无前端单元测试。UI 已选用 Element Plus，管理后台目前只有壳和仪表盘
 
 ---
 
 ## 前端现状（ghost-frame-frontend）
 
-**2026-11-09 无变化**，仍是阶段 5 验收通过的形态。
+**2026-11-27**：在阶段 5 的登录闭环上加了 Element Plus 和管理后台壳。开发端口改为 **5187**，与后端 CORS 一致。
 
-- 依赖：`vue ^3.5.44`、`vue-router ^4.6.4`、`pinia ^4.1.0`、`axios ^1.20.0`；devDeps `vite ^8.3.4`、`@vitejs/plugin-vue ^6.0.10`。scripts 只有 `dev` / `build` / `preview`
-- `vite.config.js` 代理 `/ghost` → `http://localhost:10583`，`host: true`、`port: 5173`
+- 依赖：`vue ^3.5.44`、`vue-router ^4.6.4`、`pinia ^4.1.0`、`axios ^1.20.0`、`element-plus ^2.14.8`、`@element-plus/icons-vue ^2.3.2`。devDeps：`vite ^8.3.4`、`@vitejs/plugin-vue ^6.0.10`、`unplugin-auto-import`、`unplugin-vue-components`。scripts 只有 `dev` / `build` / `preview`
+- `vite.config.js` 代理 `/ghost` → `http://localhost:10583`，`host: true`、`port: 5187`。Element Plus 按需自动导入，模板里直接写 `el-*`
+- `App.vue` 用 `el-config-provider` 包一层中文 locale，内部仍是 `<router-view />`。没有 `app.use(ElementPlus)`
 - Vite 默认模板已清理（`HelloWorld.vue`、`assets/{hero.png, vite.svg, vue.svg}`）
 
 | 文件 | 当前状态 |
 | --- | --- |
 | `src/main.js` | `createApp(App).use(pinia).use(router).mount('#app')`，Pinia 在 Router 之前 |
-| `src/App.vue` | 模板为 `<router-view />` |
 | `src/api/request.js` | `baseURL: '/ghost'`；带 `Authorization: Bearer`；业务码 200 解包 `data`。本地 access token 的 `exp` 已过、或接口返回 401，且存在 `ghost-refresh-token` 时，先调 `POST /auth/refresh` 再重放原请求。`skipAuthRedirect` 只禁止跳登录页 |
 | `src/api/auth.js` | `login` / `register` / `getMe` / `logout` |
 | `src/stores/user.js` | 两张票写入 `localStorage`；`login`、`register` 写入用户信息；`fetchMe` 合并 `/me`；`logout` 先调接口，无论成败都清本地 |
-| `src/router/index.js` | `/`、`/login`、`/register`；`beforeEach`：无 token 去登录并带 `redirect`；已登录访问登录/注册回首页 |
+| `src/router/index.js` | `/`、`/login`、`/register`、`/admin`。`beforeEach`：无 token 去登录；目标是首页时不带 `redirect`，避免管理员登录后被送回首页。已登录再进登录/注册时，`ADMIN` / `SUPER_ADMIN` 去 `/admin`，其余回首页 |
 | `src/components/PasswordInput.vue` | `toggleVisible` 在明文和圆点间切换，按钮为眼睛图标 |
-| `src/views/login/LoginView.vue` | 密码框用 `PasswordInput`；用户名框回车聚焦密码框；校验与登录失败显示在对应输入框下方；成功后按 `redirect` 回跳 |
+| `src/views/login/LoginView.vue` | 密码框用 `PasswordInput`；用户名框回车聚焦密码框；校验与登录失败显示在对应输入框下方。成功后优先按 `redirect` 回跳，否则管理员进 `/admin`，普通用户回首页 |
 | `src/views/login/RegisterView.vue` | 字段顺序：昵称、用户名、密码、确认密码。两个密码框用 `PasswordInput`；校验与 `RegisterRequestDTO` 对齐；成功后自动登录 |
-| `src/views/HomeView.vue` | 展示昵称、用户名、角色；无 `userInfo` 或 access token 已过期时调 `fetchMe`，并按 `exp` 定时再拉一次以触发刷新；登出后回 `/login` |
+| `src/views/HomeView.vue` | 展示昵称、用户名、角色；无 `userInfo` 或 access token 已过期时调 `fetchMe`，并按 `exp` 定时再拉一次以触发刷新；可进入管理后台；登出后回 `/login` |
+| `src/layouts/AdminLayout.vue` | Element Plus 顶栏和侧栏。侧栏目前只有「首页」。顶栏下拉登出 |
+| `src/views/admin/DashboardView.vue` | `/admin` 默认页，展示当前用户昵称、用户名、角色 |
 
-前端 README 仍是 Vite 默认模板内容，未定制。
+`ghost-frame-frontend/README.md` 仍是 Vite 默认模板，未定制。
+
+角色只影响登录后的落点，**不参与接口鉴权**。`/admin` 只要已登录就能进，普通用户也能从首页点进去。
 
 ---
 
@@ -243,17 +255,12 @@ API 统一前缀：`/ghost/**`，由 `${api}` 配置注入。
 | 4 | 前端 Vite 壳 + axios 代理 | 已完成 |
 | 5 | 前端登录页 + 路由守卫 + 联调 | 已完成（2026-10-24 验收） |
 | 6 | 登出与刷新 Token、测试、日志、仓库补齐 | 已完成（2026-11-06 验收）。Token 刷新链路、`mvn test` 实测通过。表结构后改为 `data_table/` 手工维护 |
-| **7a** | **按业务模块重构分包 + 接口资源池** | **进行中**。分包重构、扫描/比对/应用三接口、启动类去掉 `@MapperScan`、`UserMapper.xml` 迁到 `modules/user/mapper/` 已完成。2026-11-12 已移除 Flyway，建表改为手工执行 `data_table/` |
+| **7a** | **按业务模块重构分包 + 接口资源池** | **代码已落地，未单独验收**。分包、扫描/比对/应用三接口、去掉 `@MapperScan`、`UserMapper.xml` 同包、移除 Flyway 均已完成。2026-11-27 另增用户分页接口、MyBatis-Plus 分页插件、接口注解与 `apifox/ghost_frame.apifox.json` |
 | 7b | 权限模型：权限点、权限角色、用户关联 | 未开始 |
 | 7c | 接口级校验过滤器 + `SecurityConfig` 放行收紧 | 未开始 |
-| 7d | 前端权限：拉取权限集合、路由与菜单过滤 | 未开始 |
+| 7d | 前端权限：拉取权限集合、路由与菜单过滤 | 未开始。管理后台壳（`/admin`）已有，菜单未按权限过滤 |
 
-**仓库状态（2026-11-09）：** `master` 分支，最新提交仍是 `3587ce1`。工作区**有大量未提交改动**，尚未形成新提交：
-
-- 按业务模块移动的 Java 多为 `RM`（index 已记为 rename，工作区相对 index 还有修改）
-- `UserMapper.xml` 已 staged 迁到 `resources/com/ghost/frame/modules/user/mapper/`
-- 已改：启动类（去掉 `@MapperScan`）、`application.yml`（`mapper-locations` 写成了点号通配 `classpath*:com.ghost.frame.modules.**.mapper/*.xml`）、`SecurityConfig.java`、`UserServiceImplTest.java`、`README.md`、`AGENTS.md`
-- 尚未跟踪：`modules/api/`、`utils/`、`data_table/schema/api_resource.sql`、`data_table/migration/`、`ApiResourceScannerTest.java`
+进度以本表为准。不要再引用 2026-11-09 的工作区清单或提交号。
 
 ---
 
@@ -273,7 +280,7 @@ API 统一前缀：`/ghost/**`，由 `${api}` 配置注入。
 6. **`@RequestMapping` 不要在 `${api}` 前再加斜杠**：写成 `/${api}` 会拼出双斜杠。
 7. **数据库名为 `silly_ghost_frame`**（不是早期建议的 `ghost_frame`）。建表与改表只通过 `data_table/` 手工执行。
 8. **access token 有效期 6 小时**（`jwt.expiration-ms: 21600000`，`application.yml` 注释写作「半天」），**refresh token 7 天**（`jwt.refresh-expiration-ms: 604800000`）。Secret 从 `application-local.yml` 的 `jwt.jwt-secret` 注入，不入库。两种票用 claim `tokenType` 区分。
-9. **后端端口 10583**（`server.port`），不是 8080。`vite.config.js` 代理 target 已是 `http://localhost:10583`，两处必须一起改。前端 dev 端口 5173。
+9. **后端端口 10583**（`server.port`），不是 8080。`vite.config.js` 代理 target 已是 `http://localhost:10583`，两处必须一起改。前端 dev 端口 **5187**，`SecurityConfig` 的 CORS 只放行 `http://localhost:5187`。改端口时这两处一起改。
 10. **不要把 `application-local.yml` 提交进去**（`.gitignore` 第 36 行 `**/application-local.yml` 已覆盖，仓库只留 `.example`）。`.idea/` 也已被根 `.gitignore` 第 11 行忽略。
 11. **`UserRole` 只区分账号类型**，不参与接口鉴权。现有接口只区分未登录和已登录。**不要用 `@PreAuthorize` 或 `hasRole`** 把 `USER` / `ADMIN` / `SUPER_ADMIN` 绑到接口上（全后端已无这类注解，别加回去）。权限归属由阶段 7 的独立权限角色承担。
 12. **公开注册固定为 `UserRole.USER`**。`RegisterRequestDTO` 里不要加 `role`。
@@ -286,6 +293,30 @@ API 统一前缀：`/ghost/**`，由 `${api}` 配置注入。
 16. **`UserServiceImpl` 与 `ApiResourceServiceImpl` 存在重复依赖**：两者都 `extends ServiceImpl<XxxMapper, XxxEntity>`（父类已持有 `baseMapper`），又额外 `@Autowired` 注入了同一个 Mapper。功能正常，但可直接用父类的 `getBaseMapper()` 去掉冗余字段。
 17. **`@RequiredArgsConstructor` 与 `@Value` 的配合**：`ApiResourceScannerUtil` 的 `apiPrefix` 字段刻意**不加 `final`**。加了它会变成构造器参数，而 Lombok 默认不把字段上的 `@Value` 复制到构造器参数，结果占位符不解析、启动报 `Could not resolve placeholder 'api'`。
 18. **`@Qualifier` 在 `@RequiredArgsConstructor` 下默认失效**：Lombok 不会把它复制到构造器参数。若要用，需在 `ghost-frame-backend/` 根加 `lombok.config`：`lombok.copyableAnnotations += org.springframework.beans.factory.annotation.Qualifier`。目前项目未加该文件，按名取 bean 的写法不依赖它。
+
+---
+
+## 接口文档规范与 Apifox 文件（2026-11-27 起）
+
+knife4j / springdoc 看代码上的注解。Apifox 只维护一份导入文件：`ghost-frame-backend/apifox/ghost_frame.apifox.json`。不要再拆 `json-schema/`，也不要加生成脚本。改接口、请求体或响应体时，注解和这份文件一起改。
+
+### 代码
+
+- 控制器类用 `@Tag(name, description)`，方法用 `@Operation(summary)`。补充约束写在 `description`，不要另起一套命名。
+- 请求用 `*RequestDTO` / `*DTO`，响应用 `*VO`。类和每个字段都写 `@Schema(description = "...")`，说明与字段注释一致。
+- 统一响应是 `Response<T>`：`code`、`message`、`data`。成功时 `code = 200`，`message = 运行成功`。
+- 会出现在 JSON 里的公共字段也要有 `@Schema`，包括 `BaseEntity`、`PageResult`。
+- 枚举在 JSON 里是枚举名（如 `USER`、`NORMAL`、`EXISTS`），不是库里的 code。枚举类用 `@Schema` 写明每个名字的含义。
+- GET 的查询对象用 `@ParameterObject`，按 Query 传，不要写成 JSON Body。`GET /ghost/user/page` 的参数是 `UserPageDTO`。
+- 匿名接口在 `@Operation` 上写 `security = {}`：`POST /ghost/auth/login`、`/register`、`/refresh`。其余接口走 `OpenApiConfig` 的 Bearer Token。
+- 登出成功时 `data` 为 `null`，且不吊销已签发的 token。文档里不要写成 token 已失效。
+
+### Apifox 文件
+
+- 在 Apifox 里选「导入数据 → Apifox」导入 `ghost_frame.apifox.json`。环境 `baseUrl` 为 `http://localhost:10583/ghost`，文件里的 path 不再重复 `/ghost`。
+- 接口目录：`用户管理`、`API资源管理`、`登录注册`。数据模型目录：`用户模块`、`登录模块`、`API资源管理模块`，其下分 `请求体` 与 `响应体`。
+- 需要登录的接口通过公共参数带 `Authorization: Bearer <token>`。登录、注册、刷新不带这个头。
+- 成功响应引用对应的 `*Response` 模型，结构与 `Response<T>` 一致。分页数据是 `PageResult`：`current`、`size`、`total`、`pages`、`records`。
 
 ---
 
@@ -342,7 +373,7 @@ API 统一前缀：`/ghost/**`，由 `${api}` 配置注入。
 ### 5. 可与上述并行的补齐项
 
 - **服务端 token 吊销**：给 refresh token 加服务端存储或黑名单。当前鉴权闭环唯一的实质缺口
-- **前端工程化**：ESLint + Prettier、UI 组件库选型、`request.js` 与 store 的单测、定制前端 README
+- **前端工程化**：ESLint + Prettier、`request.js` 与 store 的单测、定制前端 README。UI 组件库已选 Element Plus
 - **通用能力**：分页封装、统一 CRUD 基类、操作日志、文件上传
 - **CI**：`mvn test` + `npm run build` 自动校验
 - **清理冗余**：问题 16 的重复 Mapper 注入
@@ -366,17 +397,18 @@ API 统一前缀：`/ghost/**`，由 `${api}` 配置注入。
 - **后端由用户手动开发。** 对 `ghost-frame-backend/` 只给步骤、接口约定和示例片段，不直接改 Java、XML、SQL 或 `pom.xml`，除非用户在当次对话里明确要求改某个后端文件
 - **前端可以由 AI 写。** 可以改 `ghost-frame-frontend/`。每次交付前端代码时，用中文说明每个改动文件的作用，以及关键函数、请求和路由各自做什么
 - 修改代码时**不改动无关文件**；保持包名 `com.ghost.frame` 与「按业务模块分包」结构
+- 改接口、请求体或响应体时，同步改 `ghost-frame-backend/apifox/ghost_frame.apifox.json`。不要另建 schema 目录或生成脚本
 - 密钥、数据库密码不进仓库；本地配置用 `application-local.yml` 或环境变量
 - 问答与请求权限用中文；代码注释保持简洁，仅解释非显而易见的逻辑
 - **不要加回 Flyway。** 表结构只维护在 `data_table/`，由人工执行。当前优先进入阶段 7b 权限模型设计，第一步是定模型和表结构，不是直接写过滤器
-- 进度基线：阶段 0–6 已验收；阶段 7a 进行中。2026-11-12 已移除 Flyway 依赖、`spring.flyway` 配置和 `db/migration` 脚本
+- 进度基线：阶段 0–6 已验收；阶段 7a 代码已落地、未单独验收。2026-11-12 已移除 Flyway。下一步仍是阶段 7b，先定权限模型，不先写过滤器
 
 ---
 
 ## 参考：联调拓扑
 
 ```text
-浏览器 (localhost:5173)
+浏览器 (localhost:5187)
     ↓ Vite 代理 /ghost
 Spring Boot (localhost:10583)
     ↓ SecurityFilterChain → JwtAuthenticationFilter

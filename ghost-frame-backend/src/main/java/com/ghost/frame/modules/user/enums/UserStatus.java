@@ -1,6 +1,7 @@
 package com.ghost.frame.modules.user.enums;
 
 import com.baomidou.mybatisplus.annotation.EnumValue;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 
 import java.util.Arrays;
@@ -11,6 +12,7 @@ import java.util.Arrays;
  */
 
 @Getter
+@Schema(description = "用户状态。JSON 为枚举名。NORMAL 正常，LOCKED 禁用")
 public enum UserStatus {
     NORMAL(1, "正常"),
     LOCKED(0, "禁用");

@@ -16,19 +16,19 @@
 
 ```text
 ghost-frame-backend/     Spring Boot，接口前缀 /ghost，端口 10583
-ghost-frame-frontend/    Vue 3 + Vite，开发端口 5173
+ghost-frame-frontend/    Vue 3 + Vite + Element Plus，开发端口 5187
 ```
 
 后端包结构按**业务模块**划分，模块内再按层组织：
 
 ```text
 com.ghost.frame
-├── common/      框架级横切：Response、MyMetaObjectHandler、全局异常
-├── config/      OpenApiConfig
+├── common/      框架级横切：MyMetaObjectHandler、全局异常
+├── config/      OpenApiConfig、MybatisPlusConfig
 ├── security/    SecurityConfig、JwtAuthenticationFilter、JwtUtil
 ├── utils/       ApiResourceScannerUtil（只读扫描容器路由）
 └── modules/
-    ├── common/  跨模块共享：BaseController、BaseEntity、DeleteFlag
+    ├── common/  跨模块共享：Response、PageResult、BaseController、BaseEntity、DeleteFlag
     ├── user/    用户与鉴权：controller / service / entity / mapper / dto / vo / enums
     └── api/     接口资源池：controller / service / entity / mapper / dto / vo / enums
 ```
@@ -86,6 +86,12 @@ access token 有效期 6 小时（`jwt.expiration-ms: 21600000`），refresh tok
 - `POST /ghost/api-resource/apply`：提交人工勾选的差异，**唯一写入口**
 - `GET /ghost/api-resource/list`：查询表内接口清单
 
+用户（`modules/user`），需登录：
+
+- `GET /ghost/user/page`：分页查询用户。参数走 Query（`pageNum`、`pageSize`、`username`、`nickname`、`status`），不是 JSON Body。返回 `PageResult`（`current`、`size`、`total`、`pages`、`records`）
+
+Apifox 只维护 `ghost-frame-backend/apifox/ghost_frame.apifox.json`。导入时环境地址是 `http://localhost:10583/ghost`，文件里的路径不再重复 `/ghost`。
+
 扫描只收录 `/ghost` 前缀下的路由，`/v3/api-docs`、`/doc.html`、`/webjars`、`/error` 等框架端点自动排除。表里的「删除」只把 `status` 置为 0，不物理删除记录——后续权限表要按 `id` 引用这张表。`remark` 字段由人工维护，扫描同步不会覆盖它。
 
 `UserRole` 只表示账号类型，不参与接口鉴权。公开接口以外的请求都要求已登录。接口级权限体系尚在建设中。
@@ -99,23 +105,25 @@ npm install
 npm run dev
 ```
 
-浏览器打开 <http://localhost:5173>。Vite 把以 `/ghost` 开头的请求代理到 `http://localhost:10583`。
+浏览器打开 <http://localhost:5187>。Vite 把以 `/ghost` 开头的请求代理到 `http://localhost:10583`。后端 CORS 只放行这个端口。
 
 登录态放在 `localStorage`：access token 键名 `ghost-token`，refresh token 键名 `ghost-refresh-token`。access token 过期或接口返回 401 时，前端会先调 `/ghost/auth/refresh`，再重放原来的请求。未登录访问首页会跳到登录页。
 
-前端目前覆盖登录、注册、首页三个页面；接口资源管理尚无界面，可直接调接口或用 knife4j 调试。
+前端使用 Element Plus。页面有登录、注册、首页，以及 `/admin` 管理后台（顶栏、侧栏和当前用户信息）。`ADMIN` 与 `SUPER_ADMIN` 登录后进入 `/admin`，普通用户进入首页；角色不参与接口鉴权，已登录的普通用户也能打开 `/admin`。接口资源管理和用户分页尚无界面，可直接调接口，或用 knife4j、Apifox 调试。
 
 ## 联调顺序
 
 1. MySQL 已建库，并已手工执行 `data_table/schema/` 中的全量脚本
 2. `application-local.yml` 已填写
 3. 后端在 10583 启动
-4. 前端在 5173 启动
-5. 注册 → 登录 → 首页能看到用户信息 → 刷新页面后仍保持登录 → 登出
+4. 前端在 5187 启动
+5. 注册 → 登录 → 首页能看到用户信息 → 刷新页面后仍保持登录 → 登出。管理员登录后应进入 `/admin`
 
 ## 当前状态
 
-阶段 0–6 已完成并验收（鉴权闭环、Token 刷新、测试、仓库补齐）。表结构改为只由 `data_table/` 手工维护，启动不再执行迁移。正在进行的是接口资源池与后续的权限体系。
+阶段 0–6 已完成并验收（鉴权闭环、Token 刷新、测试、仓库补齐）。表结构只由 `data_table/` 手工维护，启动不再执行迁移。
+
+阶段 7a 的代码已落地、尚未单独验收：按业务模块分包、接口资源池三接口、用户分页、Apifox 导入文件、Element Plus 管理后台壳。下一步是权限模型（阶段 7b），还没有权限表和接口级校验。接口资源管理页面也还没有。
 
 ## 开发约定
 
