@@ -1,43 +1,96 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ArrowDown, HomeFilled, SwitchButton, UserFilled } from '@element-plus/icons-vue'
+import {
+  ArrowDown,
+  Expand,
+  Fold,
+  HomeFilled,
+  SwitchButton,
+  UserFilled,
+} from '@element-plus/icons-vue'
 import { useUserStore } from '../stores/user'
+
+const NARROW_QUERY = '(max-width: 768px)'
 
 const route = useRoute()
 const router = useRouter()
 const userStore = useUserStore()
 
+const collapsed = ref(false)
 // 菜单高亮跟随当前路由；子路由为空路径时 route.path 就是 /admin
 const activeMenu = computed(() => route.path)
 
-async function handleLogout() {
+let narrowMedia
+
+function syncCollapsed() {
+  collapsed.value = narrowMedia.matches
+}
+
+function toggleCollapsed() {
+  collapsed.value = !collapsed.value
+}
+
+function goFront() {
+  router.push('/')
+}
+
+async function handleCommand(command) {
+  if (command !== 'logout') {
+    return
+  }
   await userStore.logout()
   router.push('/login')
 }
+
+onMounted(() => {
+  narrowMedia = window.matchMedia(NARROW_QUERY)
+  syncCollapsed()
+  narrowMedia.addEventListener('change', syncCollapsed)
+})
+
+onBeforeUnmount(() => {
+  narrowMedia?.removeEventListener('change', syncCollapsed)
+})
 </script>
 
 <template>
   <el-container class="admin-layout">
     <el-header class="admin-header">
-      <span class="brand">Ghost Frame 管理后台</span>
-      <el-dropdown @command="handleLogout">
-        <span class="user-entry">
-          <el-icon><UserFilled /></el-icon>
-          <span>{{ userStore.nickname || userStore.userInfo?.username || '已登录用户' }}</span>
-          <el-icon><ArrowDown /></el-icon>
-        </span>
-        <template #dropdown>
-          <el-dropdown-menu>
-            <el-dropdown-item command="logout" :icon="SwitchButton">登出</el-dropdown-item>
-          </el-dropdown-menu>
-        </template>
-      </el-dropdown>
+      <div class="header-side">
+        <el-button
+          text
+          :icon="collapsed ? Expand : Fold"
+          aria-label="折叠侧栏"
+          @click="toggleCollapsed"
+        />
+        <span class="brand">Ghost Frame 管理后台</span>
+      </div>
+      <div class="header-side">
+        <el-button text @click="goFront">返回前台</el-button>
+        <el-dropdown @command="handleCommand">
+          <span class="user-entry">
+            <el-icon><UserFilled /></el-icon>
+            <span>{{ userStore.nickname || userStore.userInfo?.username || '已登录用户' }}</span>
+            <el-icon><ArrowDown /></el-icon>
+          </span>
+          <template #dropdown>
+            <el-dropdown-menu>
+              <el-dropdown-item command="logout" :icon="SwitchButton">登出</el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
+      </div>
     </el-header>
 
     <el-container class="admin-body">
-      <el-aside width="220px" class="admin-aside">
-        <el-menu :default-active="activeMenu" router>
+      <el-aside :width="collapsed ? '64px' : '220px'" class="admin-aside">
+        <el-menu
+          class="admin-menu"
+          :default-active="activeMenu"
+          :collapse="collapsed"
+          router
+        >
           <el-menu-item index="/admin">
             <el-icon><HomeFilled /></el-icon>
             <span>首页</span>
@@ -64,6 +117,12 @@ async function handleLogout() {
   border-bottom: 1px solid var(--el-border-color);
 }
 
+.header-side {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .brand {
   font-size: 18px;
   font-weight: 600;
@@ -80,11 +139,18 @@ async function handleLogout() {
   outline: none;
 }
 
-.admin-aside {
-  border-right: 1px solid var(--el-border-color);
+.admin-body {
+  min-height: 0;
 }
 
 .admin-aside {
+  border-right: 1px solid var(--el-border-color);
+  overflow: hidden;
+  transition: width 0.2s;
+}
+
+.admin-menu {
+  height: 100%;
   border-right: none;
 }
 

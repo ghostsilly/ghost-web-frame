@@ -100,7 +100,8 @@ ghost-web-frame/
         ├── api/request.js                 # axios + Bearer + 解包；401 或过期时先刷新再重放
         ├── api/auth.js                    # login / register / getMe / logout
         ├── components/PasswordInput.vue
-        ├── layouts/AdminLayout.vue       # 管理后台顶栏、侧栏、登出
+        ├── constants/userRole.js         # UserRole 枚举名 → 中文
+        ├── layouts/AdminLayout.vue       # 管理后台顶栏、可折叠侧栏、返回前台、登出
         ├── router/index.js                # / /login /register /admin + beforeEach
         ├── stores/user.js                 # token 持久化与 login / register / fetchMe / logout
         └── views/HomeView.vue、views/login/{LoginView, RegisterView}.vue、views/admin/DashboardView.vue
@@ -234,13 +235,52 @@ API 统一前缀：`/ghost/**`，由 `${api}` 配置注入。
 | `src/components/PasswordInput.vue` | `toggleVisible` 在明文和圆点间切换，按钮为眼睛图标 |
 | `src/views/login/LoginView.vue` | 密码框用 `PasswordInput`；用户名框回车聚焦密码框；校验与登录失败显示在对应输入框下方。成功后优先按 `redirect` 回跳，否则管理员进 `/admin`，普通用户回首页 |
 | `src/views/login/RegisterView.vue` | 字段顺序：昵称、用户名、密码、确认密码。两个密码框用 `PasswordInput`；校验与 `RegisterRequestDTO` 对齐；成功后自动登录 |
+| `src/constants/userRole.js` | `roleLabel` 把 `USER` / `ADMIN` / `SUPER_ADMIN` 转成中文。首页与管理后台共用 |
 | `src/views/HomeView.vue` | 展示昵称、用户名、角色；无 `userInfo` 或 access token 已过期时调 `fetchMe`，并按 `exp` 定时再拉一次以触发刷新；可进入管理后台；登出后回 `/login` |
-| `src/layouts/AdminLayout.vue` | Element Plus 顶栏和侧栏。侧栏目前只有「首页」。顶栏下拉登出 |
-| `src/views/admin/DashboardView.vue` | `/admin` 默认页，展示当前用户昵称、用户名、角色 |
+| `src/layouts/AdminLayout.vue` | 顶栏：折叠按钮、品牌、返回前台、用户菜单。`handleCommand` 只在 `logout` 时清登录态并去 `/login`。侧栏目前只有「首页」。宽度 ≤ 768px 时默认收起，宽屏默认展开 |
+| `src/views/admin/DashboardView.vue` | `/admin` 默认页。页头「首页」加通栏个人信息（昵称、用户名、角色标签）。没有 `userInfo` 时拉 `/me`，失败则登出并回登录页 |
 
 `ghost-frame-frontend/README.md` 仍是 Vite 默认模板，未定制。
 
 角色只影响登录后的落点，**不参与接口鉴权**。`/admin` 只要已登录就能进，普通用户也能从首页点进去。
+
+---
+
+## 前端代码规范（2026-11-27 起）
+
+按当前仓库已经形成的习惯收束。新代码照此写，不顺手全库格式化。
+
+### 技术边界
+
+- Vue 3 `<script setup>`，JavaScript，不引入 TypeScript。
+- 新页面用 Element Plus。组件按需自动导入，模板里写 `el-*`，不要 `app.use(ElementPlus)`。图标从 `@element-plus/icons-vue` 按名引入。
+- 登录、注册现在的原生表单先留着。管理后台和以后的新页面不再混用原生 `button` 和手写输入框。
+- 请求只走 `src/api/request.js`，页面和 store 不直接使用 `axios`。接口按模块放在 `src/api/`，例如 `auth.js`。
+- 登录态只通过 `src/stores/user.js` 读写。新代码不要在组件里直接动 `localStorage`。
+
+### 目录
+
+- `api/` 请求，`stores/` Pinia，`router/` 路由，`layouts/` 只放壳，`views/` 按路由分（`login/`、`admin/`），`components/` 可复用组件，`constants/` 枚举文案。
+- 一个 `.vue` 文件只放一个组件。组件文件 PascalCase。路由页面放 `views`，不要把页面塞进 `components`。
+- 还没有第二处复用前，不新建 `composables/`、`utils/`。
+
+### 格式
+
+- 新代码：2 空格、单引号、不加分号、一行一条语句。Vue 单文件和 `vite.config.js` 已经是 2 空格。
+- `router/index.js`、`stores/user.js`、`api/request.js` 仍是 4 空格，`request.js` 还用了双引号和分号。改到哪个文件，哪个文件再对齐，不要为对齐单独开一次全库格式化。
+- `<script setup>` 顺序：依赖 import、本地常量、`useRoute` / `useRouter` / store、`ref` 与 `computed`、函数、生命周期。
+
+### 页面与样式
+
+- 页面样式 `scoped`。管理后台颜色用 Element Plus 的 `var(--el-*)`，不把管理端规则写进 `style.css`。`style.css` 只留全站 reset 和登录注册共用类。
+- 路由必须有 `name`。公开页用 `meta.public`。管理子路由挂在 `/admin` 下面，继续懒加载。
+- 后端枚举名（`USER`、`ADMIN`）不直接展示。中文映射只放 `constants/`，例如 `userRole.js` 的 `roleLabel`。
+- 注释只解释非显而易见的原因（例如为什么首页登录跳转不带 `redirect`）。不写复述代码的注释。
+
+### 工程化（尚未接入）
+
+- 以后用 ESLint（`plugin:vue/vue3-recommended`）加 Prettier，规则与上面的 2 空格、单引号、无分号对齐，再补 `npm run lint`。单独一次接上，不要和页面改动混在一起。
+- `ghost-frame-frontend/README.md` 仍是 Vite 默认模板。根 `README.md` 的「前端」一节是给开发者看的入口。
 
 ---
 
@@ -395,7 +435,7 @@ knife4j / springdoc 看代码上的注解。Apifox 只维护一份导入文件�
 ## 给 AI Agent 的协作约定
 
 - **后端由用户手动开发。** 对 `ghost-frame-backend/` 只给步骤、接口约定和示例片段，不直接改 Java、XML、SQL 或 `pom.xml`，除非用户在当次对话里明确要求改某个后端文件
-- **前端可以由 AI 写。** 可以改 `ghost-frame-frontend/`。每次交付前端代码时，用中文说明每个改动文件的作用，以及关键函数、请求和路由各自做什么
+- **前端可以由 AI 写。** 可以改 `ghost-frame-frontend/`。写前端时遵守上文「前端代码规范」。每次交付前端代码时，用中文说明每个改动文件的作用，以及关键函数、请求和路由各自做什么
 - 修改代码时**不改动无关文件**；保持包名 `com.ghost.frame` 与「按业务模块分包」结构
 - 改接口、请求体或响应体时，同步改 `ghost-frame-backend/apifox/ghost_frame.apifox.json`。不要另建 schema 目录或生成脚本
 - 密钥、数据库密码不进仓库；本地配置用 `application-local.yml` 或环境变量

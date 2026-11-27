@@ -3,19 +3,13 @@ import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '../stores/user'
 import { isAccessTokenExpired, readAccessExp, TOKEN_KEY } from '../api/request'
+import { roleLabel } from '../constants/userRole'
 
 const router = useRouter()
 const userStore = useUserStore()
 const loading = ref(false)
 
-// 后端 UserRole 枚举经 Jackson 序列化为枚举名字符串
-const ROLE_LABEL = {
-  USER: '普通用户',
-  ADMIN: '管理员',
-  SUPER_ADMIN: '超级管理员',
-}
-
-const roleText = computed(() => ROLE_LABEL[userStore.userInfo?.role] ?? '未知角色')
+const roleText = computed(() => roleLabel(userStore.userInfo?.role))
 
 async function loadMe() {
   loading.value = true

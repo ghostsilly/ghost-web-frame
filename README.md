@@ -109,7 +109,15 @@ npm run dev
 
 登录态放在 `localStorage`：access token 键名 `ghost-token`，refresh token 键名 `ghost-refresh-token`。access token 过期或接口返回 401 时，前端会先调 `/ghost/auth/refresh`，再重放原来的请求。未登录访问首页会跳到登录页。
 
-前端使用 Element Plus。页面有登录、注册、首页，以及 `/admin` 管理后台（顶栏、侧栏和当前用户信息）。`ADMIN` 与 `SUPER_ADMIN` 登录后进入 `/admin`，普通用户进入首页；角色不参与接口鉴权，已登录的普通用户也能打开 `/admin`。接口资源管理和用户分页尚无界面，可直接调接口，或用 knife4j、Apifox 调试。
+前端使用 Element Plus，组件按需自动导入，模板里直接写 `el-*`。页面有登录、注册、首页，以及 `/admin` 管理后台。管理后台顶栏有折叠侧栏、返回前台和登出；侧栏目前只有「首页」；首页展示当前用户的昵称、用户名和角色。窗口窄于 768px 时侧栏默认收起。`ADMIN` 与 `SUPER_ADMIN` 登录后进入 `/admin`，普通用户进入首页；角色不参与接口鉴权，已登录的普通用户也能打开 `/admin`。接口资源管理和用户分页尚无界面，可直接调接口，或用 knife4j、Apifox 调试。
+
+角色枚举名不直接展示，中文在 `src/constants/userRole.js`。写前端时的目录、格式和请求约定见 `AGENTS.md` 的「前端代码规范」。要点：
+
+- Vue 3 `<script setup>`，JavaScript，不引入 TypeScript
+- 请求只走 `src/api/request.js`，登录态只通过 `src/stores/user.js` 读写
+- 新代码 2 空格、单引号、不加分号。`router/index.js`、`stores/user.js`、`api/request.js` 仍是旧格式，改到哪个文件再对齐哪个文件
+- 登录、注册保持现有原生表单。管理后台和以后的新页面用 Element Plus
+- 尚无 ESLint / Prettier。`ghost-frame-frontend/README.md` 仍是 Vite 默认模板
 
 ## 联调顺序
 
@@ -123,11 +131,11 @@ npm run dev
 
 阶段 0–6 已完成并验收（鉴权闭环、Token 刷新、测试、仓库补齐）。表结构只由 `data_table/` 手工维护，启动不再执行迁移。
 
-阶段 7a 的代码已落地、尚未单独验收：按业务模块分包、接口资源池三接口、用户分页、Apifox 导入文件、Element Plus 管理后台壳。下一步是权限模型（阶段 7b），还没有权限表和接口级校验。接口资源管理页面也还没有。
+阶段 7a 的代码已落地、尚未单独验收：按业务模块分包、接口资源池三接口、用户分页、Apifox 导入文件、Element Plus 管理后台（顶栏、可折叠侧栏、个人信息首页）。下一步是权限模型（阶段 7b），还没有权限表和接口级校验。接口资源管理页面也还没有。
 
 ## 开发约定
 
-`AGENTS.md` 记录了完整的项目结构、包结构约定、数据库脚本规范、已知问题和下一步计划，改动代码前请先读它。要点：
+`AGENTS.md` 记录了完整的项目结构、包结构约定、前端代码规范、数据库脚本规范、已知问题和下一步计划，改动代码前请先读它。要点：
 
 - 后端代码由开发者手动维护
 - 密钥、数据库密码不进仓库
