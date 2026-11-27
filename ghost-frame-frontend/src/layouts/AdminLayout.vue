@@ -3,10 +3,13 @@ import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import {
   ArrowDown,
+  Connection,
   Expand,
   Fold,
   HomeFilled,
+  Setting,
   SwitchButton,
+  User,
   UserFilled,
 } from '@element-plus/icons-vue'
 import { useUserStore } from '../stores/user'
@@ -88,6 +91,7 @@ onBeforeUnmount(() => {
         <el-menu
           class="admin-menu"
           :default-active="activeMenu"
+          :default-openeds="['system']"
           :collapse="collapsed"
           router
         >
@@ -95,6 +99,20 @@ onBeforeUnmount(() => {
             <el-icon><HomeFilled /></el-icon>
             <span>首页</span>
           </el-menu-item>
+          <el-sub-menu index="system">
+            <template #title>
+              <el-icon><Setting /></el-icon>
+              <span>系统管理</span>
+            </template>
+            <el-menu-item index="/admin/users">
+              <el-icon><User /></el-icon>
+              <span>用户管理</span>
+            </el-menu-item>
+            <el-menu-item index="/admin/api-resources">
+              <el-icon><Connection /></el-icon>
+              <span>功能管理</span>
+            </el-menu-item>
+          </el-sub-menu>
         </el-menu>
       </el-aside>
 
