@@ -2,6 +2,7 @@
 package com.ghost.frame.modules.common.entity;
 
 import com.ghost.frame.common.throwable.enums.ErrorCode;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -13,20 +14,24 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Schema(description = "响应结果封装类")
 public class Response<T> {
   /**
    * 响应码
    */
+  @Schema(description = "响应码")
   private  Integer code;
 
   /**
    * 响应信息
    */
+  @Schema(description = "响应信息")
   private String message;
 
   /**
    * 响应数据
    */
+  @Schema(description = "响应数据")
   private T data;
 
   public static <T> Response<T> success(T data) {

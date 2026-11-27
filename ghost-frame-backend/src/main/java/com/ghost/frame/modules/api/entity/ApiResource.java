@@ -3,6 +3,7 @@ package com.ghost.frame.modules.api.entity;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.ghost.frame.modules.common.entity.BaseEntity;
 import com.ghost.frame.modules.api.enums.ApiResourceStatus;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -17,33 +18,41 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @TableName(value = "api_resource")
+@Schema(description = "后端 api 接口资源类")
 public class ApiResource extends BaseEntity {
   /**
    * 主键
    */
+  @Schema(description = "主键")
   private Long id;
   /**
    * 路径
    */
+  @Schema(description = "路径")
   private String path;
   /**
    * 方法
    */
+  @Schema(description = "方法")
   private String method;
   /**
    * 模块
    */
+  @Schema(description = "模块")
   private String module;
   /**
    * 简要描述
    */
+  @Schema(description = "简要描述")
   private String summary;
   /**
    * 处理类
    */
+  @Schema(description = "处理类")
   private String handler;
   /**
    * 状态
    */
+  @Schema(description = "状态")
   private ApiResourceStatus status;
 }

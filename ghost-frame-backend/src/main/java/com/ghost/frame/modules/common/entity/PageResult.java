@@ -1,6 +1,7 @@
 package com.ghost.frame.modules.common.entity;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 import java.util.List;
@@ -14,22 +15,27 @@ public class PageResult<T> {
   /** 
    * 当前页码 
    */
+  @Schema(description = "当前页码")
   private long current;
   /** 
    * 每页条数 
    */
+  @Schema(description = "每页条数")
   private long size;
   /**
    * 总记录数 
    */
+  @Schema(description = "总记录数")
   private long total;
   /**
    * 总页数 
    */
+  @Schema(description = "总页数")
   private long pages;
   /** 
    * 数据列表 
    */
+  @Schema(description = "数据列表")
   private List<T> records;
 
   public static <T> PageResult<T> of(IPage<T> page) {

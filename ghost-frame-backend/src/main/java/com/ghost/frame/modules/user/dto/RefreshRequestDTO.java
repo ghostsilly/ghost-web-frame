@@ -13,6 +13,6 @@ import lombok.Data;
 public class RefreshRequestDTO {
   
   @NotBlank(message = "refreshToken不能为空")
-  @Schema(description = "refreshToken")
+  @Schema(description = "刷新令牌")
   private String refreshToken;
 }
